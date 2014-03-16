@@ -24,7 +24,33 @@ int Controller::drive(unsigned char s1, unsigned char s2, char dir1, char dir2){
   }
 }
 
+void Controller::trim(unsigned char t1, unsigned char t2, unsigned char t3, unsigned char t4){
+  trim1 = t1;
+  trim2 = t2;
+  trim3 = t3;
+  trim4 = t4;
+}
+
 int Controller::steer(char a1, char a2, char a3, char a4){
+
+  a1 = a1 + trim1;
+  a2 = a2 + trim2;
+  a3 = a3 + trim3;
+  a4 = a4 + trim4;
+
+  if(a1 > 180){
+    a1 = 180;
+  }
+  if(a2 > 180){
+    a2 = 180;
+  }
+  if(a3 > 180){
+    a3 = 180;
+  }
+  if(a4 > 180){
+    a4 = 180;
+  }
+
   unsigned char packet[5] = {'S', a1, a2, a3, a4};
 
   //Write packet and wait for status byte

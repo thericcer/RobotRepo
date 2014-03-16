@@ -7,12 +7,21 @@ class Controller{
 private:
   Serial serialPort; // serial class object
   char status; //Current status byte
+
+  //Trim values for each of the steering motors
+  char trim1;
+  char trim2;
+  char trim3;
+  char trim4;
   
 
 public:
 
   /*Constructor opens serial port and serial port location "/dev/ttyXX" is passed in*/
   Controller(std::string file);
+
+  /*This function takes four values for trimming the steering servos. */
+  void trim(unsigned char t1, unsigned char t2, unsigned char t3, unsigned char t4);
 
   /*Drive takes 4 arguments. The first 2 are speeds, 0-255. The Last 2 are the directions, F or R.
     The function return 1 upon receiving an 0x2 from the controller and it returns -1 if something

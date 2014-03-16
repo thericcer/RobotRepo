@@ -85,6 +85,8 @@ void getSquare(void){
 
 int main(void){
 
+  controller.trim(8, 0, 5, 10);
+
   setDistance();
   getSquare();
   
