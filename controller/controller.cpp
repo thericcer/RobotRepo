@@ -1,7 +1,7 @@
 #include "controller.hpp"
 #include <iostream>
 
-Controller::Controller(std::string file){
+Controller::Controller(std::string file):trim1(0),trim2(0),trim3(0),trim4(0){
   serialPort.open_port(file);
   sleep(2);
 }
