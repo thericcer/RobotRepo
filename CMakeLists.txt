@@ -1,4 +1,5 @@
 # This directory contains all necesary code 
+
 # for communication for the Gamma 2 Demo
 
 cmake_minimum_required(VERSION 2.6)
