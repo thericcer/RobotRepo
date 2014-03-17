@@ -10,6 +10,7 @@ int main(void){
   sleep(5);
   controller.moveHook(120);
   sleep(2);
+  controller.moveHook(0);
 
   return 1;
 }
