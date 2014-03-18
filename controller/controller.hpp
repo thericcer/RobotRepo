@@ -1,6 +1,8 @@
 #include <serial.hpp>
 #include <iostream>
 #include <string.h>
+#include <boost/thread.hpp>
+
 
 class Controller{
 
@@ -14,6 +16,8 @@ private:
   char trim3;
   char trim4;
   
+  //Mutex stuff
+  boost::mutex mtx;
 
 public:
 
