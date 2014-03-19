@@ -65,4 +65,8 @@ public:
   */
   int getStatus(char* statusArray);
 
+  /*Close sets all motors to default and off state and closes the serial port
+   */
+  int close(void);
+
 };  

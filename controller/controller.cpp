@@ -168,3 +168,25 @@ int Controller::getStatus(char* statusArray){
   }
 }
   
+int Controller::close(void){
+  
+  unsigned char packet[5] = {'D', 0, 0, 'F', 'F'};
+
+  while(!mtx.try_lock());
+
+  serialPort.m_write(packet, 5);
+  while(serialPort.peek() <1);
+  serialPort.m_read(&status, 1);
+
+  packet[0] = 'S';
+  packet[1] = 90;
+  packet[2] = 90;
+  packet[3] = 90;
+  packet[4] = 90;
+
+  serialPort.m_write(packet, 5);
+  while(serialPort.peek() < 1);
+  serialPort.m_read(&status, 1);
+
+  serialPort.close_port();
+}
