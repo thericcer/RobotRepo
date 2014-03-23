@@ -32,7 +32,6 @@ public:
   /*Constructor opens serial port and serial port location "/dev/ttyXX" is passed in*/
   Controller(std::string file);
 
-  ~Controller(void);
 
   /*This function takes four values for trimming the steering servos. */
   void trim(unsigned char t1, unsigned char t2, unsigned char t3, unsigned char t4);

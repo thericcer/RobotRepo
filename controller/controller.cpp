@@ -7,10 +7,6 @@ Controller::Controller(std::string file):trim1(0),trim2(0),trim3(0),trim4(0), bo
   sleep(2);
 }
   
-Controller::~Controller(void){
-  Controller::close();
-}
-
 int Controller::drive(unsigned char s1, unsigned char s2, char dir1, char dir2){
   unsigned char packet[5] = {'D', s1, s2, dir1, dir2};
 
@@ -151,7 +147,8 @@ int Controller::deployCamera(unsigned char lower, unsigned char upper){
   unsigned char packet[5] = {'B', boomLowerHome, boomUpperHome, 0, 0};
   int i;
 
- 
+  while(!mtx.try_lock()); 
+
   if(boomLowerHome < 180 && boomUpperHome < 180){
     serialPort.m_write(packet, 5);
     while(serialPort.peek() < 1);
@@ -178,6 +175,9 @@ int Controller::deployCamera(unsigned char lower, unsigned char upper){
 	  while(serialPort.peek() < 1);
 	  serialPort.m_read(&status, 1);
 	  usleep(10000);
+	  boomLower = i;
+	  boomUpper = boomUpperHome;
+
     }
     
     for(i=boomUpperHome; i < upper; i+=1){
@@ -191,6 +191,7 @@ int Controller::deployCamera(unsigned char lower, unsigned char upper){
 	  while(serialPort.peek() < 1);
 	  serialPort.m_read(&status, 1);
 	  usleep(10000);
+	  boomUpper = i;
     }
   }
 
@@ -205,6 +206,8 @@ int Controller::deployCamera(unsigned char lower, unsigned char upper){
 	  while(serialPort.peek() < 1);
 	  serialPort.m_read(&status, 1);
 	  usleep(10000);
+	  boomLower = i;
+	  boomUpper = boomUpperHome;
     }
     
     for(i=boomUpperHome; i > upper; i-=1){
@@ -218,11 +221,11 @@ int Controller::deployCamera(unsigned char lower, unsigned char upper){
 	  while(serialPort.peek() < 1);
 	  serialPort.m_read(&status, 1);
 	  usleep(10000);
+	  boomUpper = i;
     }
   }
     
-  boomLower = lower;
-  boomUpper = upper;
+  mtx.unlock();
   
   if(status == 0x2){
     return 1;
@@ -235,6 +238,8 @@ int Controller::deployCamera(unsigned char lower, unsigned char upper){
 int Controller::retractCamera(void){
   unsigned char packet[5] = {'B', boomLowerHome, boomUpperHome, 0, 0};
   int i;
+
+  while(!mtx.try_lock());
 
   if(boomLower < boomLowerHome && boomUpper < boomUpperHome){
     for(i=boomLower; i < boomLowerHome; i+=1){
@@ -291,6 +296,8 @@ int Controller::retractCamera(void){
   }
     
   
+  mtx.unlock();
+
   if(status == 0x2){
     return 1;
   }
