@@ -1,6 +1,8 @@
 #include <serial.hpp>
 #include <iostream>
 #include <string.h>
+#include <boost/thread.hpp>
+
 
 class Controller{
 
@@ -14,11 +16,16 @@ private:
   char trim3;
   char trim4;
   
+
   //Current and home position for camera boom
   char boomLower;
   char boomUpper;
   char boomLowerHome;
   char boomUpperHome;
+
+  //Mutex stuff
+  boost::mutex mtx;
+
 
 public:
 
@@ -77,5 +84,9 @@ public:
     unsigned short LoopTime in ms
   */
   int getStatus(char* statusArray);
+
+  /*Close sets all motors to default and off state and closes the serial port
+   */
+  int close(void);
 
 };  

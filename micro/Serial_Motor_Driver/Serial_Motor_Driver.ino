@@ -21,10 +21,14 @@
 
 #define DRIVE 'D'
 #define STEER 'S'
+#define BREAKOUT 'B'
 #define FORWARD 'F'
 #define SENSOR 'Z'
 #define STATUS 'C'
 #define PLATFORM 'P'
+
+enum {ERROR, NORMAL, SLEEP};
+char errorFlag = 0;
 
 unsigned char inPacket[5];
 
@@ -56,7 +60,11 @@ Servo rightRear;
 Servo platformLeft;
 Servo platformRight;
 
-char newData;
+volatile char state;
+
+void sensorISR(){
+  state = ERROR;
+}
 
 void setup(){
   //Begin Serial at common baud rate.
@@ -105,31 +113,29 @@ void setup(){
   rightRear.write(90);
   platformRight.write(90);
   platformLeft.write(90);
+
+  //Setup Edge detectioin ISR
+  attachInterrupt(3, sensorISR, RISING);
 }
 
 void loop(){
   oldLoopTime = millis();
-  newData = 0;
-  //Serial.println("Hello");
+  state = SLEEP;
   //Loop until we get 5 bytes from the UART then read them into inPacket
   StatusByte = 0;
   if(Serial.available() == 5){
-    newData = 1;
+    state = NORMAL;
     for(int i = 0; i < 5 ; i++){
       inPacket[i] = Serial.read();
-    }
-    
-    if(0){
-      analogWrite(6, 0);
-      analogWrite(11, 0);
-      StatusByte = StatusByte | 0x1;
     }
     
     StatusByte = 0x02 | StatusByte; 
     Serial.write(StatusByte);
     
   }
-  if (newData){
+  
+  //Normal packet received state
+  if (state == NORMAL){
     //Figure out what motors are called for
     switch (inPacket[0]){
       
@@ -277,9 +283,115 @@ void loop(){
     }
   }
   
+  //Error State
+  if(state == ERROR){
+    
+    analogWrite(11, 0);
+    analogWrite(12, 0);
+    errorFlag = 1;
+    //Hang here and still receive packets from computer
+    while(errorFlag){
+      if(Serial.available() == 5){
+        state = NORMAL;
+        for(int i = 0; i < 5 ; i++){
+          inPacket[i] = Serial.read();
+        }
+        
+        StatusByte = 0x01 | StatusByte; 
+        Serial.write(StatusByte);
+        
+      }
+      
+      switch(inPacket[0]){
+       case DRIVE: 
+	
+	MotorArray[0] = inPacket[1];
+	MotorArray[1] = inPacket[2];
+	MotorArray[2] = inPacket[3];
+	MotorArray[3] = inPacket[4];
+	
+	//Set Direction, Assuming we want both front and back going the same way
+	if (MotorArray[2] == FORWARD){
+	  digitalWrite(2, HIGH);
+	  digitalWrite(3, LOW);
+	  
+	}
+	else {
+	  digitalWrite(2, LOW);
+	  digitalWrite(3, HIGH);
+	  
+	}
+	
+	if (MotorArray[3] == FORWARD){
+	  digitalWrite(4, HIGH);
+	  digitalWrite(5, LOW);
+	}
+	
+	else {
+	  digitalWrite(4, LOW);
+	  digitalWrite(5, HIGH);
+	}
+	
+	
+	//Next set speed
+	analogWrite(11, MotorArray[0]);
+	analogWrite(12, MotorArray[1]);
+        
+	break;
+	
+      case STEER:
+	
+	SteerArray[0] = inPacket[1];
+	SteerArray[1] = inPacket[2];
+	SteerArray[2] = inPacket[3];
+	SteerArray[3] = inPacket[4];
+	//Check and set servo angles
+	if(SteerArray[0] <= 180){
+	  leftFront.write(SteerArray[0]);
+	}
+	else{
+	  StatusByte = 0x4 | StatusByte;
+	}
+	
+	if(SteerArray[1] <= 180){
+	  leftRear.write(SteerArray[1]);
+	}
+	else{
+	  StatusByte = 0x4 | StatusByte;
+	}
+	
+	if(SteerArray[2] <= 180){
+	  rightFront.write(SteerArray[2]);
+	}
+	else{
+	  StatusByte = 0x4 | StatusByte;
+	}
+	
+	if(SteerArray[3] <= 180){
+	  rightRear.write(SteerArray[3]);
+	}
+	else{
+	  StatusByte = 0x4 | StatusByte;
+	}        
+	break;
+
+      case BREAKOUT:
+	errorFlag = 0;
+        rightRear.write(180);
+        delayMicroseconds(100000000);
+        state = NORMAL;
+	analogWrite(11, 0);
+	analogWrite(12, 0);
+        break;
+      }
+    }
+  }
+	
+	
   loopTime = millis() - oldLoopTime;  
   LoopCount++;
 }
-
-
-
+      
+      
+      
+      
