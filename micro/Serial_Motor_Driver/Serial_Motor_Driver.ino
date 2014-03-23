@@ -58,8 +58,7 @@ Servo leftFront;
 Servo leftRear;
 Servo rightFront;
 Servo rightRear;
-Servo platformLeft;
-Servo platformRight;
+Servo platform;
 Servo cameraBoomLower;
 Servo cameraBoomUpper;
 
@@ -106,8 +105,7 @@ void setup(){
   leftRear.attach(8);
   rightFront.attach(9);
   rightRear.attach(10);
-  platformRight.attach(26);
-  platformLeft.attach(27);
+  platform.attach(27);
   cameraBoomLower.attach(28);
   cameraBoomUpper.attach(29);
 
@@ -116,8 +114,7 @@ void setup(){
   leftRear.write(90);
   rightFront.write(90);
   rightRear.write(90);
-  platformRight.write(90);
-  platformLeft.write(90);
+  platform.write(90);
   cameraBoomLower.write(130);
   cameraBoomUpper.write(130);
 
@@ -271,17 +268,14 @@ void loop(){
     case PLATFORM:
       if(inPacket[1] == 'U'){
 	//Move Platform Up
-	platformRight.write(180);
-	platformLeft.write(180);
+	platform.write(180);
       }
       if(inPacket[1] == 'D'){
 	//Move Platform Down
-	platformRight.write(0);
-	platformLeft.write(0);
+	platform.write(0);
       }
       if(inPacket[1] == 'S'){
-	platformRight.write(90);
-	platformLeft.write(90);
+	platform.write(90);
       }
       break;
       
