@@ -14,6 +14,11 @@ private:
   char trim3;
   char trim4;
   
+  //Current and home position for camera boom
+  char boomLower;
+  char boomUpper;
+  char boomLowerHome;
+  char boomUpperHome;
 
 public:
 
@@ -49,6 +54,18 @@ public:
 
   /*Takes an angle between 0 and 180 and it moves the position of the hook to that angle*/
   int moveHook(unsigned char angle);
+
+
+  /*This function runs the servos to deploy the camera to see the tools.
+    The function will hang until the camera servos are in position. The two arguments
+    are the positions of each servo.
+  */
+  int deployCamera(unsigned char lower, unsigned char upper);
+
+  /*This function returns the camera boom to it's packed state. The two arguments
+    are the upper and lower servos' retracted posistions.
+  */
+  int retractCamera(unsigned char lower, unsigned char upper);
 
   /*Set Status takes one argument, an address to the start of a 10 character array. When called it 
     will pull all stored datastructures from the controller to verify data sent to the controller.

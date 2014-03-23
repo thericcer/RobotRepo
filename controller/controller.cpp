@@ -1,7 +1,7 @@
 #include "controller.hpp"
 #include <iostream>
 
-Controller::Controller(std::string file){
+Controller::Controller(std::string file):boomLowerHome(0), boomUpperHome(0){
   serialPort.open_port(file);
   sleep(2);
 }
@@ -116,6 +116,89 @@ int Controller::moveHook(unsigned char angle){
   serialPort.m_read(&status, 1);
 
   if (status == 0x2){
+    return 1;
+  }
+  else{
+    return -1;
+  }
+}
+
+int Controller::deployCamera(unsigned char lower, unsigned char upper){
+  unsigned char packet[5] = {'B', boomLowerHome, boomUpperHome, 0, 0};
+  int i;
+
+  if(boomLowerHome < 180 && boomUpperHome < 180){
+    serialPort.m_write(packet, 5);
+    while(serialPort.peek() < 1);
+    serialPort.m_read(&status, 1);
+  }
+  else{
+    packet[0] = 'B';
+    packet[1] = 180;
+    packet[2] = 180;
+    packet[3] = 0;
+    packet[4] = 0;
+    serialPort.m_write(packet, 5);
+    while(serialPort.peek() < 1);
+    serialPort.m_read(&status, 1);
+  }
+
+  if(boomLowerHome < lower && boomUpperHome < upper){
+    for(i=boomLowerHome; i < lower; i+=5){
+          packet[0] = 'B';
+	  packet[1] = i;
+	  packet[2] = boomUpperHome;
+	  packet[3] = 0;
+	  packet[4] = 0;
+	  serialPort.m_write(packet, 5);
+	  while(serialPort.peek() < 1);
+	  serialPort.m_read(&status, 1);
+	  sleep(0.5);
+    }
+    
+    for(i=boomUpperHome; i < upper; i+=5){
+          packet[0] = 'B';
+	  packet[1] = lower;
+	  packet[2] = i;
+	  packet[3] = 0;
+	  packet[4] = 0;
+     
+	  serialPort.m_write(packet, 5);
+	  while(serialPort.peek() < 1);
+	  serialPort.m_read(&status, 1);
+	  sleep(0.5);
+    }
+  }
+
+  else{
+    for(i=boomLowerHome; i > lower; i-=5){
+          packet[0] = 'B';
+	  packet[1] = i;
+	  packet[2] = boomUpperHome;
+	  packet[3] = 0;
+	  packet[4] = 0;
+	  serialPort.m_write(packet, 5);
+	  while(serialPort.peek() < 1);
+	  serialPort.m_read(&status, 1);
+	  sleep(0.5);
+    }
+    
+    for(i=boomUpperHome; i > upper; i-=5){
+          packet[0] = 'B';
+	  packet[1] = lower;
+	  packet[2] = i;
+	  packet[3] = 0;
+	  packet[4] = 0;
+     
+	  serialPort.m_write(packet, 5);
+	  while(serialPort.peek() < 1);
+	  serialPort.m_read(&status, 1);
+	  sleep(0.5);
+    }
+  }
+    
+  
+  if(status == 0x2){
     return 1;
   }
   else{
