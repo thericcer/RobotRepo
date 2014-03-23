@@ -16,13 +16,22 @@ private:
   char trim3;
   char trim4;
   
+
+  //Current and home position for camera boom
+  unsigned char boomLower;
+  unsigned char boomUpper;
+  unsigned char boomLowerHome;
+  unsigned char boomUpperHome;
+
   //Mutex stuff
   boost::mutex mtx;
+
 
 public:
 
   /*Constructor opens serial port and serial port location "/dev/ttyXX" is passed in*/
   Controller(std::string file);
+
 
   /*This function takes four values for trimming the steering servos. */
   void trim(unsigned char t1, unsigned char t2, unsigned char t3, unsigned char t4);
@@ -54,6 +63,18 @@ public:
   /*Takes an angle between 0 and 180 and it moves the position of the hook to that angle*/
   int moveHook(unsigned char angle);
 
+
+  /*This function runs the servos to deploy the camera to see the tools.
+    The function will hang until the camera servos are in position. The two arguments
+    are the positions of each servo.
+  */
+  int deployCamera(unsigned char lower, unsigned char upper);
+
+  /*This function returns the camera boom to it's packed state. The two arguments
+    are the upper and lower servos' retracted posistions.
+  */
+  int retractCamera();
+
   /*Set Status takes one argument, an address to the start of a 10 character array. When called it 
     will pull all stored datastructures from the controller to verify data sent to the controller.
     This function waits for all data from the controller to be in the serial buffer until attemting
@@ -64,5 +85,9 @@ public:
     unsigned short LoopTime in ms
   */
   int getStatus(char* statusArray);
+
+  /*Close sets all motors to default and off state and closes the serial port
+   */
+  int close(void);
 
 };  
