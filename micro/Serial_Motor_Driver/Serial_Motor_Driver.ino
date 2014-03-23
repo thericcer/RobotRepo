@@ -24,8 +24,9 @@
 #define BREAKOUT 'B'
 #define FORWARD 'F'
 #define SENSOR 'Z'
-#define STATUS 'C'
+#define STATUS 'X'
 #define PLATFORM 'P'
+#define CAMERA 'C'
 
 enum {ERROR, NORMAL, SLEEP};
 char errorFlag = 0;
@@ -59,6 +60,8 @@ Servo rightFront;
 Servo rightRear;
 Servo platformLeft;
 Servo platformRight;
+Servo cameraBoomLower;
+Servo cameraBoomUpper;
 
 volatile char state;
 
@@ -105,6 +108,8 @@ void setup(){
   rightRear.attach(10);
   platformRight.attach(26);
   platformLeft.attach(27);
+  cameraBoomLower.attach(28);
+  cameraBoomUpper.attach(29);
 
   
   leftFront.write(90);
@@ -113,6 +118,8 @@ void setup(){
   rightRear.write(90);
   platformRight.write(90);
   platformLeft.write(90);
+  cameraBoomLower.write(130);
+  cameraBoomUpper.write(130);
 
   //Setup Edge detectioin ISR
   attachInterrupt(3, sensorISR, RISING);
@@ -278,6 +285,11 @@ void loop(){
       }
       break;
       
+    case CAMERA:
+      cameraBoomLower.write(inPacket[1]);
+      cameraBoomUpper.write(inPacket[2]);
+      break;
+
     default:
       break;
     }

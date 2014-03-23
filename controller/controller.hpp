@@ -18,10 +18,10 @@ private:
   
 
   //Current and home position for camera boom
-  char boomLower;
-  char boomUpper;
-  char boomLowerHome;
-  char boomUpperHome;
+  unsigned char boomLower;
+  unsigned char boomUpper;
+  unsigned char boomLowerHome;
+  unsigned char boomUpperHome;
 
   //Mutex stuff
   boost::mutex mtx;
@@ -31,6 +31,8 @@ public:
 
   /*Constructor opens serial port and serial port location "/dev/ttyXX" is passed in*/
   Controller(std::string file);
+
+  ~Controller(void);
 
   /*This function takes four values for trimming the steering servos. */
   void trim(unsigned char t1, unsigned char t2, unsigned char t3, unsigned char t4);
@@ -72,7 +74,7 @@ public:
   /*This function returns the camera boom to it's packed state. The two arguments
     are the upper and lower servos' retracted posistions.
   */
-  int retractCamera(unsigned char lower, unsigned char upper);
+  int retractCamera();
 
   /*Set Status takes one argument, an address to the start of a 10 character array. When called it 
     will pull all stored datastructures from the controller to verify data sent to the controller.

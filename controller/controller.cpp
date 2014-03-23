@@ -1,12 +1,15 @@
 #include "controller.hpp"
 #include <iostream>
+#include <stdio.h>
 
-
-Controller::Controller(std::string file):trim1(0),trim2(0),trim3(0),trim4(0), boomLowerHome(0), boomUpperHome(0){
+Controller::Controller(std::string file):trim1(0),trim2(0),trim3(0),trim4(0), boomLowerHome(130), boomUpperHome(130){
   serialPort.open_port(file);
   sleep(2);
 }
   
+Controller::~Controller(void){
+  Controller::close();
+}
 
 int Controller::drive(unsigned char s1, unsigned char s2, char dir1, char dir2){
   unsigned char packet[5] = {'D', s1, s2, dir1, dir2};
@@ -148,6 +151,7 @@ int Controller::deployCamera(unsigned char lower, unsigned char upper){
   unsigned char packet[5] = {'B', boomLowerHome, boomUpperHome, 0, 0};
   int i;
 
+ 
   if(boomLowerHome < 180 && boomUpperHome < 180){
     serialPort.m_write(packet, 5);
     while(serialPort.peek() < 1);
@@ -163,10 +167,9 @@ int Controller::deployCamera(unsigned char lower, unsigned char upper){
     while(serialPort.peek() < 1);
     serialPort.m_read(&status, 1);
   }
-
   if(boomLowerHome < lower && boomUpperHome < upper){
-    for(i=boomLowerHome; i < lower; i+=5){
-          packet[0] = 'B';
+    for(i=boomLowerHome; i < lower; i+=1){
+          packet[0] = 'C';
 	  packet[1] = i;
 	  packet[2] = boomUpperHome;
 	  packet[3] = 0;
@@ -174,11 +177,11 @@ int Controller::deployCamera(unsigned char lower, unsigned char upper){
 	  serialPort.m_write(packet, 5);
 	  while(serialPort.peek() < 1);
 	  serialPort.m_read(&status, 1);
-	  sleep(0.5);
+	  usleep(10000);
     }
     
-    for(i=boomUpperHome; i < upper; i+=5){
-          packet[0] = 'B';
+    for(i=boomUpperHome; i < upper; i+=1){
+          packet[0] = 'C';
 	  packet[1] = lower;
 	  packet[2] = i;
 	  packet[3] = 0;
@@ -187,13 +190,13 @@ int Controller::deployCamera(unsigned char lower, unsigned char upper){
 	  serialPort.m_write(packet, 5);
 	  while(serialPort.peek() < 1);
 	  serialPort.m_read(&status, 1);
-	  sleep(0.5);
+	  usleep(10000);
     }
   }
 
   else{
-    for(i=boomLowerHome; i > lower; i-=5){
-          packet[0] = 'B';
+    for(i=boomLowerHome; i > lower; i-=1){
+          packet[0] = 'C';
 	  packet[1] = i;
 	  packet[2] = boomUpperHome;
 	  packet[3] = 0;
@@ -201,11 +204,11 @@ int Controller::deployCamera(unsigned char lower, unsigned char upper){
 	  serialPort.m_write(packet, 5);
 	  while(serialPort.peek() < 1);
 	  serialPort.m_read(&status, 1);
-	  sleep(0.5);
+	  usleep(10000);
     }
     
-    for(i=boomUpperHome; i > upper; i-=5){
-          packet[0] = 'B';
+    for(i=boomUpperHome; i > upper; i-=1){
+          packet[0] = 'C';
 	  packet[1] = lower;
 	  packet[2] = i;
 	  packet[3] = 0;
@@ -214,7 +217,76 @@ int Controller::deployCamera(unsigned char lower, unsigned char upper){
 	  serialPort.m_write(packet, 5);
 	  while(serialPort.peek() < 1);
 	  serialPort.m_read(&status, 1);
-	  sleep(0.5);
+	  usleep(10000);
+    }
+  }
+    
+  boomLower = lower;
+  boomUpper = upper;
+  
+  if(status == 0x2){
+    return 1;
+  }
+  else{
+    return -1;
+  }
+}
+
+int Controller::retractCamera(void){
+  unsigned char packet[5] = {'B', boomLowerHome, boomUpperHome, 0, 0};
+  int i;
+
+  if(boomLower < boomLowerHome && boomUpper < boomUpperHome){
+    for(i=boomLower; i < boomLowerHome; i+=1){
+          packet[0] = 'C';
+	  packet[1] = i;
+	  packet[2] = boomUpper;
+	  packet[3] = 0;
+	  packet[4] = 0;
+	  serialPort.m_write(packet, 5);
+	  while(serialPort.peek() < 1);
+	  serialPort.m_read(&status, 1);
+	  usleep(10000);
+    }
+    
+    for(i=boomUpper; i < boomUpperHome; i+=1){
+          packet[0] = 'C';
+	  packet[1] = boomLowerHome;
+	  packet[2] = i;
+	  packet[3] = 0;
+	  packet[4] = 0;
+     
+	  serialPort.m_write(packet, 5);
+	  while(serialPort.peek() < 1);
+	  serialPort.m_read(&status, 1);
+	  usleep(10000);
+    }
+  }
+
+  else{
+    for(i=boomLower; i > boomLowerHome; i-=1){
+          packet[0] = 'C';
+	  packet[1] = i;
+	  packet[2] = boomUpper;
+	  packet[3] = 0;
+	  packet[4] = 0;
+	  serialPort.m_write(packet, 5);
+	  while(serialPort.peek() < 1);
+	  serialPort.m_read(&status, 1);
+	  usleep(10000);
+    }
+    
+    for(i=boomUpper; i > boomUpperHome; i-=1){
+          packet[0] = 'C';
+	  packet[1] = boomLowerHome;
+	  packet[2] = i;
+	  packet[3] = 0;
+	  packet[4] = 0;
+     
+	  serialPort.m_write(packet, 5);
+	  while(serialPort.peek() < 1);
+	  serialPort.m_read(&status, 1);
+	  usleep(10000);
     }
   }
     
@@ -226,6 +298,7 @@ int Controller::deployCamera(unsigned char lower, unsigned char upper){
     return -1;
   }
 }
+
 
 int Controller::getStatus(char* statusArray){
   unsigned char packet[5] = {'C', 'x', 'x', 'x', 'x'};
@@ -271,6 +344,8 @@ int Controller::close(void){
   serialPort.m_write(packet, 5);
   while(serialPort.peek() < 1);
   serialPort.m_read(&status, 1);
+
+  Controller::retractCamera();
 
   serialPort.close_port();
 }

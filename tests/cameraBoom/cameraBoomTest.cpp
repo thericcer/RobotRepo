@@ -5,9 +5,10 @@ Controller controller("/dev/ttyACM0");
 
 
 int main(void){
-  controller.deployCamera(150, 150);
+  controller.deployCamera(35, 75);
 
-  sleep(1);
+  printf("Sleeping, then closing controller\n\n");
+  sleep(5);
 
   controller.close();
   return 0;
