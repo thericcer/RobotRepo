@@ -2,7 +2,7 @@
 #include <iostream>
 #include <stdio.h>
 
-Controller::Controller(std::string file):trim1(0),trim2(0),trim3(0),trim4(0), boomLowerHome(130), boomUpperHome(130){
+Controller::Controller(std::string file):trim1(0),trim2(0),trim3(0),trim4(0), boomLowerHome(130), boomUpperHome(130), hookHome(0){
   serialPort.open_port(file);
   sleep(2);
 }
@@ -123,9 +123,9 @@ int Controller::movePlatform(char direction){
   }
 }
 
-int Controller::moveHook(unsigned char angle){
-  unsigned char packet[5] = {'H', angle, 'x', 'x', 'x'};
-
+int Controller::deployHook(unsigned char position){
+  unsigned char packet[5] = {'H', hookHome, 'x', 'x', 'x'};
+  int i;
   while(!mtx.try_lock());
 
   //write packet on serial port
@@ -133,9 +133,69 @@ int Controller::moveHook(unsigned char angle){
   while(serialPort.peek()<1);
   serialPort.m_read(&status, 1);
 
+  if(position > hookHome){
+    for (i=hookHome; i==position; i+=1){
+      hook = i;
+      packet[0] = 'H';
+      packet[1] = hook;
+      serialPort.m_write(packet, 5);
+      while(serialPort.peek()<1);
+      serialPort.m_read(&status, 1);
+      usleep(100000);
+    }
+  }
+  else{
+    for (i=hookHome; i==position; i-=1){
+      hook = i;
+      packet[0] = 'H';
+      packet[1] = hook;
+      serialPort.m_write(packet, 5);
+      while(serialPort.peek()<1);
+      serialPort.m_read(&status, 1);
+      usleep(100000);
+    }
+  }
+
   mtx.unlock();
 
   if (status == 0x2){
+    return 1;
+  }
+  else{
+    return -1;
+  }
+}
+
+int Controller::retractHook(void){
+  unsigned char packet[5] = {'H', hook, 0, 0, 0};
+  int i;
+
+  serialPort.m_write(packet, 5);
+  while(serialPort.peek()<1);
+  serialPort.m_read(&status, 1);
+
+  if(hook > hookHome){
+    for(i=hook; i==hookHome; i-=1){
+      packet[1] = i;
+      serialPort.m_write(packet, 5);
+      while(serialPort.peek()<1);
+      serialPort.m_read(&status, 1);
+      usleep(100000);
+    }
+    hook = i;
+  }
+  else{
+    for(i=hook; i==hookHome; i+=1){
+      packet[1] = i;
+      serialPort.m_write(packet, 5);
+      while(serialPort.peek()<1);
+      serialPort.m_read(&status, 1);
+      usleep(100000);
+    }
+    hook = i;
+  }
+
+  if(status == 0x2){
     return 1;
   }
   else{

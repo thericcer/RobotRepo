@@ -23,6 +23,10 @@ private:
   unsigned char boomLowerHome;
   unsigned char boomUpperHome;
 
+  //Current and home position for Hook
+  unsigned char hook;
+  unsigned char hookHome;
+
   //Mutex stuff
   boost::mutex mtx;
 
@@ -61,8 +65,10 @@ public:
   int movePlatform(char direction);
 
   /*Takes an angle between 0 and 180 and it moves the position of the hook to that angle*/
-  int moveHook(unsigned char angle);
+  int deployHook(unsigned char angle);
 
+  /*Returns the hook to the home position*/
+  int retractHook(void);
 
   /*This function runs the servos to deploy the camera to see the tools.
     The function will hang until the camera servos are in position. The two arguments
