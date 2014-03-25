@@ -289,13 +289,13 @@ void loop(){
 
     case PUSHER:
       if (inPacket[1]=='F'){
-	pusher.writeMicroseconds(1300);
+	pusher.writeMicroseconds(1550);
       }
       if (inPacket[1]=='S'){
 	pusher.writeMicroseconds(1500);
       }
       if (inPacket[1]=='R'){
-	pusher.writeMicroseconds(1700);
+	pusher.writeMicroseconds(1450);
       }
       break;
 
