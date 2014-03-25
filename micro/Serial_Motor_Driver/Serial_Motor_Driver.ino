@@ -114,7 +114,7 @@ void setup(){
   leftRear.write(90);
   rightFront.write(90);
   rightRear.write(90);
-  platform.write(90);
+  platform.writeMicroseconds(1190);
   cameraBoomLower.write(130);
   cameraBoomUpper.write(130);
 
@@ -164,13 +164,13 @@ void loop(){
       }
       
       if (MotorArray[3] == FORWARD){
-	digitalWrite(4, HIGH);
-	digitalWrite(5, LOW);
+	digitalWrite(4, LOW);
+	digitalWrite(5, HIGH);
       }
       
       else {
-	digitalWrite(4, LOW);
-	digitalWrite(5, HIGH);
+	digitalWrite(4, HIGH);
+	digitalWrite(5, LOW);
       }
       
       
@@ -268,14 +268,14 @@ void loop(){
     case PLATFORM:
       if(inPacket[1] == 'U'){
 	//Move Platform Up
-	platform.write(180);
+	platform.writeMicroseconds(700);
       }
       if(inPacket[1] == 'D'){
 	//Move Platform Down
-	platform.write(0);
+	platform.writeMicroseconds(2000);
       }
       if(inPacket[1] == 'S'){
-	platform.write(90);
+	platform.writeMicroseconds(1200);
       }
       break;
       
