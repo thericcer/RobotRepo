@@ -80,6 +80,13 @@ public:
     are the upper and lower servos' retracted posistions.
   */
   int retractCamera();
+  /*
+    This function takes in a single char F for forward, S for Stop and R for reverse
+   */
+  int pusher(char direction);
+
+
+
 
   /*Set Status takes one argument, an address to the start of a 10 character array. When called it 
     will pull all stored datastructures from the controller to verify data sent to the controller.

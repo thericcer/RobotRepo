@@ -366,6 +366,32 @@ int Controller::retractCamera(void){
   }
 }
 
+int Controller::pusher(char direction){
+  unsigned char packet[5]={'K','S',0,0,0};
+
+  while(!mtx.try_lock());
+ 
+ if (direction=='F'){
+    packet[1]='F';
+    serialPort.m_write(packet,5);
+    while(serialPort.peek()<1);
+    serialPort.m_read(&status,1);
+  }
+ if (direction=='S'){
+    packet[1]='S';
+    serialPort.m_write(packet,5);
+    while(serialPort.peek()<1);
+    serialPort.m_read(&status,1);
+  }
+ if (direction=='R'){
+    packet[1]='R';
+    serialPort.m_write(packet,5);
+    while(serialPort.peek()<1);
+    serialPort.m_read(&status,1);
+  }
+
+}
+
 
 int Controller::getStatus(char* statusArray){
   unsigned char packet[5] = {'C', 'x', 'x', 'x', 'x'};

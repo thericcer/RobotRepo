@@ -27,6 +27,7 @@
 #define STATUS 'X'
 #define PLATFORM 'P'
 #define CAMERA 'C'
+#define PUSHER 'K'
 
 enum {ERROR, NORMAL, SLEEP};
 char errorFlag = 0;
@@ -61,6 +62,7 @@ Servo rightRear;
 Servo platform;
 Servo cameraBoomLower;
 Servo cameraBoomUpper;
+Servo pusher;
 
 volatile char state;
 
@@ -108,7 +110,7 @@ void setup(){
   platform.attach(27);
   cameraBoomLower.attach(28);
   cameraBoomUpper.attach(29);
-
+  pusher.attach(30);
   
   leftFront.write(90);
   leftRear.write(90);
@@ -117,6 +119,7 @@ void setup(){
   platform.writeMicroseconds(1190);
   cameraBoomLower.write(130);
   cameraBoomUpper.write(130);
+  pusher.writeMicroseconds(1500);
 
   //Setup Edge detectioin ISR
   attachInterrupt(3, sensorISR, RISING);
@@ -282,6 +285,18 @@ void loop(){
     case CAMERA:
       cameraBoomLower.write(inPacket[1]);
       cameraBoomUpper.write(inPacket[2]);
+      break;
+
+    case PUSHER:
+      if (inPacket[1]=='F'){
+	pusher.writeMicroseconds(1300);
+      }
+      if (inPacket[1]=='S'){
+	pusher.writeMicroseconds(1500);
+      }
+      if (inPacket[1]=='R'){
+	pusher.writeMicroseconds(1700);
+      }
       break;
 
     default:
