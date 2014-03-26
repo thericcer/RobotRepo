@@ -2,8 +2,9 @@
 #include <iostream>
 #include <stdio.h>
 
-Controller::Controller(std::string file):trim1(0),trim2(0),trim3(0),trim4(0), boomLowerHome(130), boomUpperHome(130), hookHome(90){
+Controller::Controller(std::string file):trim1(0),trim2(0),trim3(0),trim4(0), boomLowerHome(130), boomUpperHome(130), hookHome(170){
   serialPort.open_port(file);
+
   sleep(2);
 }
   
@@ -124,37 +125,14 @@ int Controller::movePlatform(char direction){
 }
 
 int Controller::deployHook(unsigned char position){
-  unsigned char packet[5] = {'H', hookHome, 'x', 'x', 'x'};
+  unsigned char packet[5] = {'H', position, 'x', 'x', 'x'};
   int i;
   while(!mtx.try_lock());
 
   //write packet on serial port
   serialPort.m_write(packet, 5);
   while(serialPort.peek()<1);
-  serialPort.m_read(&status, 1);
-
-  if(position > hookHome){
-    for (i=hookHome; i==position; i+=1){
-      hook = i;
-      packet[0] = 'H';
-      packet[1] = hook;
-      serialPort.m_write(packet, 5);
-      while(serialPort.peek()<1);
-      serialPort.m_read(&status, 1);
-      usleep(100000);
-    }
-  }
-  else{
-    for (i=hookHome; i==position; i-=1){
-      hook = i;
-      packet[0] = 'H';
-      packet[1] = hook;
-      serialPort.m_write(packet, 5);
-      while(serialPort.peek()<1);
-      serialPort.m_read(&status, 1);
-      usleep(100000);
-    }
-  }
+  serialPort.m_read(&status, 1);    
 
   mtx.unlock();
 
@@ -167,33 +145,16 @@ int Controller::deployHook(unsigned char position){
 }
 
 int Controller::retractHook(void){
-  unsigned char packet[5] = {'H', hook, 0, 0, 0};
+  unsigned char packet[5] = {'H', hookHome, 0, 0, 0};
   int i;
+
+  while(mtx.try_lock());
 
   serialPort.m_write(packet, 5);
   while(serialPort.peek()<1);
   serialPort.m_read(&status, 1);
 
-  if(hook > hookHome){
-    for(i=hook; i==hookHome; i-=1){
-      packet[1] = i;
-      serialPort.m_write(packet, 5);
-      while(serialPort.peek()<1);
-      serialPort.m_read(&status, 1);
-      usleep(100000);
-    }
-    hook = i;
-  }
-  else{
-    for(i=hook; i==hookHome; i+=1){
-      packet[1] = i;
-      serialPort.m_write(packet, 5);
-      while(serialPort.peek()<1);
-      serialPort.m_read(&status, 1);
-      usleep(100000);
-    }
-    hook = i;
-  }
+  mtx.unlock();
 
   if(status == 0x2){
     return 1;
@@ -370,26 +331,32 @@ int Controller::pusher(char direction){
   unsigned char packet[5]={'K','S',0,0,0};
 
   while(!mtx.try_lock());
+
+  //  printf("Controller::pusher\n");
  
  if (direction=='F'){
-    packet[1]='F';
-    serialPort.m_write(packet,5);
-    while(serialPort.peek()<1);
-    serialPort.m_read(&status,1);
-  }
+   //   printf("Controller::pusher F\n");
+   packet[1]='F';
+   serialPort.m_write(packet,5);
+   while(serialPort.peek()<1);
+   serialPort.m_read(&status,1);
+ }
  if (direction=='S'){
-    packet[1]='S';
-    serialPort.m_write(packet,5);
-    while(serialPort.peek()<1);
-    serialPort.m_read(&status,1);
-  }
+   //   printf("Controller::pusher S\n");
+   packet[1]='S';
+   serialPort.m_write(packet,5);
+   while(serialPort.peek()<1);
+   serialPort.m_read(&status,1);
+ }
  if (direction=='R'){
-    packet[1]='R';
-    serialPort.m_write(packet,5);
-    while(serialPort.peek()<1);
-    serialPort.m_read(&status,1);
-  }
+   //   printf("Controller::pusher R\n");
+   packet[1]='R';
+   serialPort.m_write(packet,5);
+   while(serialPort.peek()<1);
+   serialPort.m_read(&status,1);
+ }
 
+ mtx.unlock(); 
 }
 
 
@@ -422,8 +389,6 @@ int Controller::close(void){
   
   unsigned char packet[5] = {'D', 0, 0, 'F', 'F'};
 
-  while(!mtx.try_lock());
-
   serialPort.m_write(packet, 5);
   while(serialPort.peek() <1);
   serialPort.m_read(&status, 1);
@@ -438,7 +403,19 @@ int Controller::close(void){
   while(serialPort.peek() < 1);
   serialPort.m_read(&status, 1);
 
-  Controller::retractCamera();
+
+  retractCamera();
+
+  retractHook();
+
+  printf("WAIT UNTIL PUSHER IS IN HOME POSITION(40 seconds)!!!\n");
+
+  pusher('R');
+  sleep(20);
+  pusher('F');
+  sleep(15);
+  printf("PUSHER IS HOME\n");
+  pusher('S');
 
   serialPort.close_port();
 }

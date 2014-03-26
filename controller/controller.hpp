@@ -24,7 +24,6 @@ private:
   unsigned char boomUpperHome;
 
   //Current and home position for Hook
-  unsigned char hook;
   unsigned char hookHome;
 
   //Mutex stuff

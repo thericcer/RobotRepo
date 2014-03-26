@@ -123,10 +123,10 @@ void setup(){
   cameraBoomLower.write(130);
   cameraBoomUpper.write(130);
   pusher.writeMicroseconds(1500);
-  hook.write(90);
+  hook.write(170);
 
   //Setup Edge detectioin ISR
-  attachInterrupt(3, sensorISR, RISING);
+  attachInterrupt(3, sensorISR, FALLING);
 }
 
 void loop(){
@@ -140,7 +140,7 @@ void loop(){
       inPacket[i] = Serial.read();
     }
     
-    StatusByte = 0x02 | StatusByte; 
+    StatusByte = 0x02; 
     Serial.write(StatusByte);
     
   }
@@ -320,8 +320,38 @@ void loop(){
   //Error State
   if(state == ERROR){
     
+    //Kill all drive motors!
     analogWrite(11, 0);
     analogWrite(12, 0);
+
+    //Quickly throw them in the opposite direction to stop faster.
+    if (MotorArray[2] == FORWARD){
+      digitalWrite(2, LOW);
+      digitalWrite(3, HIGH);
+    }
+    else {
+      digitalWrite(2, HIGH);
+      digitalWrite(3, LOW);
+      
+    }
+    
+    if (MotorArray[3] == FORWARD){
+      digitalWrite(4, HIGH);
+      digitalWrite(5, LOW);
+    }
+    
+    else {
+      digitalWrite(4, LOW);
+      digitalWrite(5, HIGH);
+    }
+    analogWrite(11, 255);
+    analogWrite(12, 255);
+    delayMicroseconds(10000);
+    analogWrite(11, 0);
+    analogWrite(12, 0);
+    
+    
+    
     errorFlag = 1;
     //Hang here and still receive packets from computer
     while(errorFlag){
@@ -331,7 +361,7 @@ void loop(){
           inPacket[i] = Serial.read();
         }
         
-        StatusByte = 0x01 | StatusByte; 
+        StatusByte = 0x01; 
         Serial.write(StatusByte);
         
       }
@@ -409,6 +439,46 @@ void loop(){
 	}        
 	break;
 
+    
+      case SENSOR:
+	switch (inPacket[1]){
+	case 0:
+	  SensorArray[0] = analogRead(0);
+	  break;
+	  
+	case 1:
+	  SensorArray[1] = analogRead(1);
+	  break;
+	  
+	case 2:
+	  pinMode(22, OUTPUT);
+	  digitalWrite(22, LOW);
+	  delayMicroseconds(2);
+	  digitalWrite(22, HIGH);
+	  delayMicroseconds(5);
+	  digitalWrite(22, LOW);
+	  pinMode(22, INPUT);    
+	  SensorArray[2] = (pulseIn(22, HIGH, 10000));
+	  break;
+	  
+	  
+	case 3:
+	  pinMode(23, OUTPUT);
+	  digitalWrite(23, LOW);
+	  delayMicroseconds(2);
+	  digitalWrite(23, HIGH);
+	  delayMicroseconds(5);
+	  digitalWrite(23, LOW);
+	  pinMode(23, INPUT);    
+	  SensorArray[3] = (pulseIn(23, HIGH, 10000));
+	  break;
+	  
+	}
+	
+	Serial.write(SensorArray[inPacket[1]] & 0xFF);
+	Serial.write((SensorArray[inPacket[1]] >> 8) & 0xFF);
+	break;
+	
       case BREAKOUT:
 	errorFlag = 0;
         rightRear.write(180);
