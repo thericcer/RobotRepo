@@ -27,6 +27,7 @@
 #define STATUS 'X'
 #define PLATFORM 'P'
 #define CAMERA 'C'
+#define PUSHER 'K'
 
 enum {ERROR, NORMAL, SLEEP};
 char errorFlag = 0;
@@ -61,6 +62,7 @@ Servo rightRear;
 Servo platform;
 Servo cameraBoomLower;
 Servo cameraBoomUpper;
+Servo pusher;
 
 volatile char state;
 
@@ -108,15 +110,16 @@ void setup(){
   platform.attach(27);
   cameraBoomLower.attach(28);
   cameraBoomUpper.attach(29);
-
+  pusher.attach(30);
   
   leftFront.write(90);
   leftRear.write(90);
   rightFront.write(90);
   rightRear.write(90);
-  platform.write(90);
+  platform.writeMicroseconds(1190);
   cameraBoomLower.write(130);
   cameraBoomUpper.write(130);
+  pusher.writeMicroseconds(1500);
 
   //Setup Edge detectioin ISR
   attachInterrupt(3, sensorISR, RISING);
@@ -164,13 +167,13 @@ void loop(){
       }
       
       if (MotorArray[3] == FORWARD){
-	digitalWrite(4, HIGH);
-	digitalWrite(5, LOW);
+	digitalWrite(4, LOW);
+	digitalWrite(5, HIGH);
       }
       
       else {
-	digitalWrite(4, LOW);
-	digitalWrite(5, HIGH);
+	digitalWrite(4, HIGH);
+	digitalWrite(5, LOW);
       }
       
       
@@ -268,20 +271,32 @@ void loop(){
     case PLATFORM:
       if(inPacket[1] == 'U'){
 	//Move Platform Up
-	platform.write(180);
+	platform.writeMicroseconds(700);
       }
       if(inPacket[1] == 'D'){
 	//Move Platform Down
-	platform.write(0);
+	platform.writeMicroseconds(2000);
       }
       if(inPacket[1] == 'S'){
-	platform.write(90);
+	platform.writeMicroseconds(1200);
       }
       break;
       
     case CAMERA:
       cameraBoomLower.write(inPacket[1]);
       cameraBoomUpper.write(inPacket[2]);
+      break;
+
+    case PUSHER:
+      if (inPacket[1]=='F'){
+	pusher.writeMicroseconds(1510);
+      }
+      if (inPacket[1]=='S'){
+	pusher.writeMicroseconds(1500);
+      }
+      if (inPacket[1]=='R'){
+	pusher.writeMicroseconds(1490);
+      }
       break;
 
     default:
