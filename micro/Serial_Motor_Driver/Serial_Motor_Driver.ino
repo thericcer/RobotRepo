@@ -119,7 +119,7 @@ void setup(){
   leftRear.write(90);
   rightFront.write(90);
   rightRear.write(90);
-  platform.writeMicroseconds(1190);
+  platform.writeMicroseconds(1250);
   cameraBoomLower.write(130);
   cameraBoomUpper.write(130);
   pusher.writeMicroseconds(1500);
@@ -282,7 +282,7 @@ void loop(){
 	platform.writeMicroseconds(2000);
       }
       if(inPacket[1] == 'S'){
-	platform.writeMicroseconds(1200);
+	platform.writeMicroseconds(1250);
       }
       break;
       
