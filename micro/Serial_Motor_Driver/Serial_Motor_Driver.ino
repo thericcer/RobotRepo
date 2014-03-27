@@ -68,10 +68,6 @@ Servo hook;
 
 volatile char state;
 
-void sensorISR(){
-  state = ERROR;
-}
-
 void setup(){
   //Begin Serial at common baud rate.
   Serial.begin(9600);
@@ -103,6 +99,9 @@ void setup(){
   */
   pinMode(12, OUTPUT);
   pinMode(11, OUTPUT);
+
+  /*These pins set up the emergency interrupt.*/
+  pinMode(20, INPUT);
   
   //Attach Servos and set initial angle
   leftFront.attach(7);
@@ -125,8 +124,6 @@ void setup(){
   pusher.writeMicroseconds(1500);
   hook.write(170);
 
-  //Setup Edge detectioin ISR
-  attachInterrupt(3, sensorISR, FALLING);
 }
 
 void loop(){
@@ -145,6 +142,10 @@ void loop(){
     
   }
   
+  if(digitalRead(20) != 1){
+    state = ERROR;
+  }
+
   //Normal packet received state
   if (state == NORMAL){
     //Figure out what motors are called for
@@ -481,8 +482,6 @@ void loop(){
 	
       case BREAKOUT:
 	errorFlag = 0;
-        rightRear.write(180);
-        delayMicroseconds(100000000);
         state = NORMAL;
 	analogWrite(11, 0);
 	analogWrite(12, 0);
