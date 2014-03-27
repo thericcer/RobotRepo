@@ -20,10 +20,10 @@ int main(void){
   sigHandler.sa_flags = 0;
   sigaction(SIGINT, &sigHandler, NULL);
 
-  controller.deployCamera(35, 75);
+  controller.deployCamera(3, 25);
 
   printf("Sleeping, then closing controller\n\n");
-  sleep(5);
+  sleep(500);
 
   controller.close();
   printf("Closed!\n\n");

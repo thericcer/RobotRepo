@@ -120,8 +120,8 @@ void setup(){
   rightFront.write(90);
   rightRear.write(90);
   platform.writeMicroseconds(1250);
-  cameraBoomLower.write(130);
-  cameraBoomUpper.write(130);
+  cameraBoomLower.write(77);
+  cameraBoomUpper.write(80);
   pusher.writeMicroseconds(1500);
   hook.write(170);
 
