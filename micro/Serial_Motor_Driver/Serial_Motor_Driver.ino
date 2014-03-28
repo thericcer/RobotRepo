@@ -302,7 +302,7 @@ void loop(){
 
     case PUSHER:
       if (inPacket[1]=='F'){
-	pusher.writeMicroseconds(1510);
+	pusher.writeMicroseconds(1600);
 	while(digitalRead(19));
 	pusher.writeMicroseconds(1500);
       }
@@ -310,7 +310,7 @@ void loop(){
 	pusher.writeMicroseconds(1500);
       }
       if (inPacket[1]=='R'){
-	pusher.writeMicroseconds(1490);
+	pusher.writeMicroseconds(1400);
 	while(digitalRead(18));
 	pusher.writeMicroseconds(1500);
       }

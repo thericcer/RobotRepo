@@ -1,7 +1,7 @@
 #include <controller.cpp>
 #include <stdio.h>
 
-Controller controller("/dev/ttyACM1");
+Controller controller("/dev/ttyACM0");
 
 
 int main(void){

@@ -1,3 +1,5 @@
+#pragma once
+
 #include <serial.hpp>
 #include <iostream>
 #include <string.h>
