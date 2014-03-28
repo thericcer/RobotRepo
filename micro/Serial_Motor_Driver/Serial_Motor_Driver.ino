@@ -29,6 +29,8 @@
 #define CAMERA 'C'
 #define PUSHER 'K'
 #define HOOK 'H'
+#define VOLTAGE 'V'
+
 
 enum {ERROR, NORMAL, SLEEP};
 char errorFlag = 0;
@@ -56,6 +58,8 @@ unsigned char MotorArray[4] = {0};
 int loopTime = 0;
 int oldLoopTime = 0;
 
+short voltage = 0;
+
 Servo leftFront;
 Servo leftRear;
 Servo rightFront;
@@ -67,10 +71,6 @@ Servo pusher;
 Servo hook;
 
 volatile char state;
-
-void sensorISR(){
-  state = ERROR;
-}
 
 void setup(){
   //Begin Serial at common baud rate.
@@ -103,6 +103,13 @@ void setup(){
   */
   pinMode(12, OUTPUT);
   pinMode(11, OUTPUT);
+
+  /*These pins set up the emergency interrupt.*/
+  pinMode(20, INPUT);
+
+  /*THese pins set up the pusher switches*/
+  pinMode(18, INPUT);
+  pinMode(19, INPUT);
   
   //Attach Servos and set initial angle
   leftFront.attach(7);
@@ -125,8 +132,6 @@ void setup(){
   pusher.writeMicroseconds(1500);
   hook.write(170);
 
-  //Setup Edge detectioin ISR
-  attachInterrupt(3, sensorISR, FALLING);
 }
 
 void loop(){
@@ -145,6 +150,10 @@ void loop(){
     
   }
   
+  if(digitalRead(20) != 1){
+    state = ERROR;
+  }
+
   //Normal packet received state
   if (state == NORMAL){
     //Figure out what motors are called for
@@ -293,14 +302,19 @@ void loop(){
 
     case PUSHER:
       if (inPacket[1]=='F'){
-	pusher.writeMicroseconds(1510);
+	pusher.writeMicroseconds(1600);
+	while(digitalRead(19));
+	pusher.writeMicroseconds(1500);
       }
       if (inPacket[1]=='S'){
 	pusher.writeMicroseconds(1500);
       }
       if (inPacket[1]=='R'){
-	pusher.writeMicroseconds(1490);
+	pusher.writeMicroseconds(1400);
+	while(digitalRead(18));
+	pusher.writeMicroseconds(1500);
       }
+      Serial.write((char)'D');
       break;
 
     case HOOK:
@@ -312,9 +326,16 @@ void loop(){
       }
       break;
 
+    case VOLTAGE:
+      voltage = analogRead(2);
+      Serial.write(voltage & 0xFF);
+      Serial.write((voltage>>8) & 0xFF);
+      break;
+
     default:
       break;
     }
+    state = SLEEP;
   }
   
   //Error State
@@ -355,8 +376,9 @@ void loop(){
     errorFlag = 1;
     //Hang here and still receive packets from computer
     while(errorFlag){
+      state = SLEEP;
       if(Serial.available() == 5){
-        state = NORMAL;
+        state = ERROR;
         for(int i = 0; i < 5 ; i++){
           inPacket[i] = Serial.read();
         }
@@ -365,132 +387,131 @@ void loop(){
         Serial.write(StatusByte);
         
       }
-      
-      switch(inPacket[0]){
-       case DRIVE: 
-	
-	MotorArray[0] = inPacket[1];
-	MotorArray[1] = inPacket[2];
-	MotorArray[2] = inPacket[3];
-	MotorArray[3] = inPacket[4];
-	
-	//Set Direction, Assuming we want both front and back going the same way
-	if (MotorArray[2] == FORWARD){
-	  digitalWrite(2, HIGH);
-	  digitalWrite(3, LOW);
+      if (state == ERROR){
+	switch(inPacket[0]){
+	case DRIVE: 
 	  
-	}
-	else {
-	  digitalWrite(2, LOW);
-	  digitalWrite(3, HIGH);
+	  MotorArray[0] = inPacket[1];
+	  MotorArray[1] = inPacket[2];
+	  MotorArray[2] = inPacket[3];
+	  MotorArray[3] = inPacket[4];
 	  
-	}
-	
-	if (MotorArray[3] == FORWARD){
-	  digitalWrite(4, HIGH);
-	  digitalWrite(5, LOW);
-	}
-	
-	else {
-	  digitalWrite(4, LOW);
-	  digitalWrite(5, HIGH);
-	}
-	
-	
-	//Next set speed
-	analogWrite(11, MotorArray[0]);
-	analogWrite(12, MotorArray[1]);
-        
-	break;
-	
-      case STEER:
-	
-	SteerArray[0] = inPacket[1];
-	SteerArray[1] = inPacket[2];
-	SteerArray[2] = inPacket[3];
-	SteerArray[3] = inPacket[4];
-	//Check and set servo angles
-	if(SteerArray[0] <= 180){
-	  leftFront.write(SteerArray[0]);
-	}
-	else{
-	  StatusByte = 0x4 | StatusByte;
-	}
-	
-	if(SteerArray[1] <= 180){
-	  leftRear.write(SteerArray[1]);
-	}
-	else{
-	  StatusByte = 0x4 | StatusByte;
-	}
-	
-	if(SteerArray[2] <= 180){
-	  rightFront.write(SteerArray[2]);
-	}
-	else{
-	  StatusByte = 0x4 | StatusByte;
-	}
-	
-	if(SteerArray[3] <= 180){
-	  rightRear.write(SteerArray[3]);
-	}
-	else{
-	  StatusByte = 0x4 | StatusByte;
-	}        
-	break;
-
-    
-      case SENSOR:
-	switch (inPacket[1]){
-	case 0:
-	  SensorArray[0] = analogRead(0);
+	  //Set Direction, Assuming we want both front and back going the same way
+	  if (MotorArray[2] == FORWARD){
+	    digitalWrite(2, HIGH);
+	    digitalWrite(3, LOW);
+	    
+	  }
+	  else {
+	    digitalWrite(2, LOW);
+	    digitalWrite(3, HIGH);
+	    
+	  }
+	  
+	  if (MotorArray[3] == FORWARD){
+	    digitalWrite(4, HIGH);
+	    digitalWrite(5, LOW);
+	  }
+	  
+	  else {
+	    digitalWrite(4, LOW);
+	    digitalWrite(5, HIGH);
+	  }
+	  
+	  
+	  //Next set speed
+	  analogWrite(11, MotorArray[0]);
+	  analogWrite(12, MotorArray[1]);
+	  
 	  break;
 	  
-	case 1:
-	  SensorArray[1] = analogRead(1);
-	  break;
+	case STEER:
 	  
-	case 2:
-	  pinMode(22, OUTPUT);
-	  digitalWrite(22, LOW);
-	  delayMicroseconds(2);
-	  digitalWrite(22, HIGH);
-	  delayMicroseconds(5);
-	  digitalWrite(22, LOW);
-	  pinMode(22, INPUT);    
-	  SensorArray[2] = (pulseIn(22, HIGH, 10000));
+	  SteerArray[0] = inPacket[1];
+	  SteerArray[1] = inPacket[2];
+	  SteerArray[2] = inPacket[3];
+	  SteerArray[3] = inPacket[4];
+	  //Check and set servo angles
+	  if(SteerArray[0] <= 180){
+	    leftFront.write(SteerArray[0]);
+	  }
+	  else{
+	    StatusByte = 0x4 | StatusByte;
+	  }
+	  
+	  if(SteerArray[1] <= 180){
+	    leftRear.write(SteerArray[1]);
+	  }
+	  else{
+	    StatusByte = 0x4 | StatusByte;
+	  }
+	  
+	  if(SteerArray[2] <= 180){
+	    rightFront.write(SteerArray[2]);
+	  }
+	  else{
+	    StatusByte = 0x4 | StatusByte;
+	  }
+	  
+	  if(SteerArray[3] <= 180){
+	    rightRear.write(SteerArray[3]);
+	  }
+	  else{
+	    StatusByte = 0x4 | StatusByte;
+	  }        
 	  break;
 	  
 	  
-	case 3:
-	  pinMode(23, OUTPUT);
-	  digitalWrite(23, LOW);
-	  delayMicroseconds(2);
-	  digitalWrite(23, HIGH);
-	  delayMicroseconds(5);
-	  digitalWrite(23, LOW);
-	  pinMode(23, INPUT);    
-	  SensorArray[3] = (pulseIn(23, HIGH, 10000));
+	case SENSOR:
+	  switch (inPacket[1]){
+	  case 0:
+	    SensorArray[0] = analogRead(0);
+	    break;
+	    
+	  case 1:
+	    SensorArray[1] = analogRead(1);
+	    break;
+	    
+	  case 2:
+	    pinMode(22, OUTPUT);
+	    digitalWrite(22, LOW);
+	    delayMicroseconds(2);
+	    digitalWrite(22, HIGH);
+	    delayMicroseconds(5);
+	    digitalWrite(22, LOW);
+	    pinMode(22, INPUT);    
+	    SensorArray[2] = (pulseIn(22, HIGH, 10000));
+	    break;
+	    
+	    
+	  case 3:
+	    pinMode(23, OUTPUT);
+	    digitalWrite(23, LOW);
+	    delayMicroseconds(2);
+	    digitalWrite(23, HIGH);
+	    delayMicroseconds(5);
+	    digitalWrite(23, LOW);
+	    pinMode(23, INPUT);    
+	    SensorArray[3] = (pulseIn(23, HIGH, 10000));
+	    break;
+	    
+	  }
+	  
+	  Serial.write(SensorArray[inPacket[1]] & 0xFF);
+	  Serial.write((SensorArray[inPacket[1]] >> 8) & 0xFF);
 	  break;
 	  
+	case BREAKOUT:
+	  errorFlag = 0;
+	  state = NORMAL;
+	  analogWrite(11, 0);
+	  analogWrite(12, 0);
+	  break;
 	}
-	
-	Serial.write(SensorArray[inPacket[1]] & 0xFF);
-	Serial.write((SensorArray[inPacket[1]] >> 8) & 0xFF);
-	break;
-	
-      case BREAKOUT:
-	errorFlag = 0;
-        rightRear.write(180);
-        delayMicroseconds(100000000);
-        state = NORMAL;
-	analogWrite(11, 0);
-	analogWrite(12, 0);
-        break;
       }
     }
+    state == SLEEP;
   }
-	
 	
   loopTime = millis() - oldLoopTime;  
   LoopCount++;

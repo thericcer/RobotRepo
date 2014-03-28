@@ -329,6 +329,7 @@ int Controller::retractCamera(void){
 
 int Controller::pusher(char direction){
   unsigned char packet[5]={'K','S',0,0,0};
+  char done;
 
   while(!mtx.try_lock());
 
@@ -340,6 +341,10 @@ int Controller::pusher(char direction){
    serialPort.m_write(packet,5);
    while(serialPort.peek()<1);
    serialPort.m_read(&status,1);
+
+   //Wait until it's done
+   while(serialPort.peek()<1);
+   serialPort.m_read(&done, 1);
  }
  if (direction=='S'){
    //   printf("Controller::pusher S\n");
@@ -354,6 +359,10 @@ int Controller::pusher(char direction){
    serialPort.m_write(packet,5);
    while(serialPort.peek()<1);
    serialPort.m_read(&status,1);
+
+   //Wait until it's done
+   while(serialPort.peek()<1);
+   serialPort.m_read(&done, 1);
  }
 
  mtx.unlock(); 
@@ -377,6 +386,39 @@ int Controller::getStatus(char* statusArray){
   mtx.unlock();
 
   //Return based on status
+  if (status == 0x2){
+    return 1;
+  }
+  else{
+    return -1;
+  }
+}
+
+int Controller::voltage(float* volts){
+  //Send voltage request
+  unsigned char packet[5] = {'V', 0, 0, 0, 0};
+  char data[2] = {0};
+  short temp = 0;
+
+  while(mtx.try_lock());
+  
+
+  serialPort.m_write(packet, 5);
+  while(serialPort.peek()<1);
+  serialPort.m_read(&status, 1);
+
+
+  //We must read the 2 returned bytes.
+  while(serialPort.peek()<2);
+  serialPort.m_read(data, 2);
+
+  temp = data[0] | data[1]<<8;
+
+
+  *volts = (5.0/1024) * temp * 3;
+
+  mtx.unlock();
+
   if (status == 0x2){
     return 1;
   }
@@ -408,14 +450,9 @@ int Controller::close(void){
 
   retractHook();
 
-/*  printf("WAIT UNTIL PUSHER IS IN HOME POSITION(40 seconds)!!!\n");
 
   pusher('R');
-  sleep(20);
   pusher('F');
-  sleep(15);
-  printf("PUSHER IS HOME\n");
   pusher('S');
-*/
   serialPort.close_port();
 }

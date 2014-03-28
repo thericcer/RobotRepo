@@ -1,5 +1,7 @@
 #include <controller.hpp>
 #include <stdio.h>
+#include <iostream>
+
 
 Controller controller("/dev/ttyACM0");
 
@@ -20,27 +22,33 @@ int main(void){
 */
   sleep(1);
   printf("Hook\n");
-  //controller.deployHook(0);
+  controller.deployHook(90);
   sleep(1);
   printf("Camera Boom\n");
   controller.deployCamera(3, 15);
   sleep(1);
   printf("Pusher R\n");
-//  controller.pusher('R');
- // sleep(15);
- // printf("Pusher S\n");
-  //controller.pusher('S');
-/*
+  controller.pusher('R');
+  sleep(15);
+  printf("Pusher S\n");
+  controller.pusher('S');
+  controller.pusher('R');
+  printf("Pusher S\n");
+  controller.pusher('S');
+
+
   printf("Platform\n");
   controller.movePlatform('U');
-  sleep(15);
+  sleep(5);
   controller.movePlatform('D');
-  sleep(10);
+  sleep(4);
   controller.movePlatform('S');
-  */
 
-
+ 
+ 
   printf("Deployed!\n");
-getchar();	
+
+  getchar();
+
   controller.close();
 }
