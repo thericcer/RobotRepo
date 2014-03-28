@@ -29,6 +29,8 @@
 #define CAMERA 'C'
 #define PUSHER 'K'
 #define HOOK 'H'
+#define VOLTAGE 'V'
+
 
 enum {ERROR, NORMAL, SLEEP};
 char errorFlag = 0;
@@ -55,6 +57,8 @@ unsigned char MotorArray[4] = {0};
 
 int loopTime = 0;
 int oldLoopTime = 0;
+
+short voltage = 0;
 
 Servo leftFront;
 Servo leftRear;
@@ -320,6 +324,12 @@ void loop(){
       else{
 	hook.write(180);
       }
+      break;
+
+    case VOLTAGE:
+      voltage = analogRead(2);
+      Serial.write(voltage & 0xFF);
+      Serial.write((voltage>>8) & 0xFF);
       break;
 
     default:

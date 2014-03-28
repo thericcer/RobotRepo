@@ -80,7 +80,7 @@ public:
   /*This function returns the camera boom to it's packed state. The two arguments
     are the upper and lower servos' retracted posistions.
   */
-  int retractCamera();
+  int retractCamera(void);
   /*
     This function takes in a single char F for forward, S for Stop and R for reverse
    */
@@ -99,6 +99,10 @@ public:
     unsigned short LoopTime in ms
   */
   int getStatus(char* statusArray);
+
+
+  /*Calling this function will populate the passed in float with the current battery voltage*/
+  int voltage(float* volts);
 
   /*Close sets all motors to default and off state and closes the serial port
    */
