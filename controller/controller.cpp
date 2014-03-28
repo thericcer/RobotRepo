@@ -450,14 +450,9 @@ int Controller::close(void){
 
   retractHook();
 
-/*  printf("WAIT UNTIL PUSHER IS IN HOME POSITION(40 seconds)!!!\n");
 
   pusher('R');
-  sleep(20);
   pusher('F');
-  sleep(15);
-  printf("PUSHER IS HOME\n");
   pusher('S');
-*/
   serialPort.close_port();
 }
