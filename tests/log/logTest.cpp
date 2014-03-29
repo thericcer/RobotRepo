@@ -9,12 +9,9 @@ int main(void){
 
   syslog(LOG_MAKEPRI(LOG_LOCAL0, LOG_INFO), "INFO this is just some random info");
 
-  sleep(5);
-  
+ 
   syslog(LOG_MAKEPRI(LOG_LOCAL0, LOG_WARNING), "Warning, a warning from the bot");
 
-  sleep(5);
-  
   syslog(LOG_MAKEPRI(LOG_LOCAL0, LOG_ERR), "Super hello! %d", 23);
 
   closelog();
