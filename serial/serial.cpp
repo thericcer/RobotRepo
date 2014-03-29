@@ -51,13 +51,13 @@ int Serial::open_port(std::string n_string)
   
   
   if (fd == -1){
-    std::cout << "this bombed\n";
+    //std::cout << "this bombed\n";
     return -1;
   }
   else
     {
       fcntl(fd, F_SETFL,FNDELAY); 
-      std::cout << "it worked and the fd = " << fd << "\n";
+      //std::cout << "it worked and the fd = " << fd << "\n";
       return 1;
     }
 }

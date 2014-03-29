@@ -1,9 +1,22 @@
 #include "controller.hpp"
 #include <iostream>
 #include <stdio.h>
+#include <syslog.h>
 
-Controller::Controller(std::string file):connected(0), trim1(0),trim2(0),trim3(0),trim4(0), boomLower(77), boomLowerHome(77), boomUpper(70), boomUpperHome(70), hookHome(170){
-  serialPort.open_port(file);
+
+Controller::Controller(std::string file):connected(-1), trim1(0),trim2(0),trim3(0),trim4(0), boomLower(77), boomLowerHome(77), boomUpper(70), boomUpperHome(70), hookHome(170){
+
+  openlog("Robot", LOG_PERROR | LOG_CONS | LOG_NDELAY, LOG_LOCAL0);
+
+  connected = serialPort.open_port(file);
+
+  if(connected > 0){
+    syslog(LOG_MAKEPRI(LOG_LOCAL0, LOG_INFO), "Port Sucessfully Opened!");
+  }
+  else{
+    syslog(LOG_MAKEPRI(LOG_LOCAL0, LOG_ERR), "Could Not Open Port!");
+  }
+
 
   sleep(2);
 }

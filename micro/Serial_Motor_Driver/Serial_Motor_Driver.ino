@@ -30,6 +30,7 @@
 #define PUSHER 'K'
 #define HOOK 'H'
 #define VOLTAGE 'V'
+#define JAW 'J'
 
 
 enum {ERROR, NORMAL, SLEEP};
@@ -69,6 +70,8 @@ Servo cameraBoomLower;
 Servo cameraBoomUpper;
 Servo pusher;
 Servo hook;
+Servo jawRight;
+Servo jawLeft;
 
 volatile char state;
 
@@ -121,6 +124,8 @@ void setup(){
   cameraBoomUpper.attach(29);
   pusher.attach(30);
   hook.attach(31);
+  jawRight.attach(32);
+  jawLeft.attach(33);
   
   leftFront.write(90);
   leftRear.write(90);
@@ -131,6 +136,8 @@ void setup(){
   cameraBoomUpper.write(70);
   pusher.writeMicroseconds(1500);
   hook.write(170);
+  jawRight.write(90);
+  jawLeft.write(98);
 
 }
 
@@ -351,6 +358,27 @@ void loop(){
       voltage = analogRead(2);
       Serial.write(voltage & 0xFF);
       Serial.write((voltage>>8) & 0xFF);
+      break;
+
+    case JAW:
+      switch(inPacket[1]){
+      case 'T':
+	jawRight.write(50);
+	jawLeft.write(58);
+	break;
+      case 'R':
+	jawRight.write(49);
+	jawLeft.write(47);
+	break;
+      case 'C':
+	jawRight.write(40);
+	jawLeft.write(48);
+	break;
+      case 'H':
+	jawRight.write(90);
+	jawLeft.write(98);
+	break;
+      }
       break;
 
     default:
