@@ -51,7 +51,7 @@ public:
     The function returns 1 upon receiving an 0x2 from the controller and it returns -1 if something
     else is returned. THIS FUNCTION WILL HANG if nothging is returned from the controller.
   */
-  int steer(char a1, char a2, char a3, char a4);
+  int steer(unsigned char a1, unsigned char a2, unsigned char a3, unsigned char a4);
 
   /*Get Sensor takes 2 arguments. The sensor number requested and the address of an unsigned short
     to put the sensor value into. The function will return a 1 upon receiving an 0x2 from the controller

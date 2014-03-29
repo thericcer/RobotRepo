@@ -36,7 +36,7 @@ void Controller::trim(unsigned char t1, unsigned char t2, unsigned char t3, unsi
   trim4 = t4;
 }
 
-int Controller::steer(char a1, char a2, char a3, char a4){
+int Controller::steer(unsigned char a1, unsigned char a2, unsigned char a3, unsigned char a4){
 
   a1 = a1 + trim1;
   a2 = a2 + trim2;
@@ -54,6 +54,18 @@ int Controller::steer(char a1, char a2, char a3, char a4){
   }
   if(a4 > 180){
     a4 = 180;
+  }
+  if(a1 < 0) {
+    a1 = 0;
+  }
+  if(a2 < 0){
+    a2 = 0;
+  }
+  if (a3 < 0){
+    a3 = 0;
+  }
+  if (a4 < 0){
+    a4 = 0;
   }
 
   unsigned char packet[5] = {'S', a1, a2, a3, a4};
