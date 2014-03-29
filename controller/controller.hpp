@@ -39,7 +39,7 @@ public:
 
 
   /*This function takes four values for trimming the steering servos. */
-  void trim(unsigned char t1, unsigned char t2, unsigned char t3, unsigned char t4);
+  void trim(char t1, char t2, char t3, char t4);
 
   /*Drive takes 4 arguments. The first 2 are speeds, 0-255. The Last 2 are the directions, F or R.
     The function return 1 upon receiving an 0x2 from the controller and it returns -1 if something

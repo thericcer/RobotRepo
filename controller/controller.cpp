@@ -2,7 +2,7 @@
 #include <iostream>
 #include <stdio.h>
 
-Controller::Controller(std::string file):trim1(0),trim2(0),trim3(0),trim4(0), boomLowerHome(77), boomUpperHome(70), hookHome(170){
+Controller::Controller(std::string file):trim1(0),trim2(0),trim3(0),trim4(0), boomLower(77), boomLowerHome(77), boomUpper(70), boomUpperHome(70), hookHome(170){
   serialPort.open_port(file);
 
   sleep(2);
@@ -29,7 +29,7 @@ int Controller::drive(unsigned char s1, unsigned char s2, char dir1, char dir2){
   }
 }
 
-void Controller::trim(unsigned char t1, unsigned char t2, unsigned char t3, unsigned char t4){
+void Controller::trim(char t1, char t2, char t3, char t4){
   trim1 = t1;
   trim2 = t2;
   trim3 = t3;
@@ -38,35 +38,64 @@ void Controller::trim(unsigned char t1, unsigned char t2, unsigned char t3, unsi
 
 int Controller::steer(unsigned char a1, unsigned char a2, unsigned char a3, unsigned char a4){
 
-  a1 = a1 + trim1;
-  a2 = a2 + trim2;
-  a3 = a3 + trim3;
-  a4 = a4 + trim4;
 
-  if(a1 > 180){
-    a1 = 180;
+
+  if(trim1 < 0){
+    if (a1 < fabs(trim1)){
+      a1 = 0;
+    }
+    else{
+      a1 = a1 + trim1;
+    }      
   }
-  if(a2 > 180){
-    a2 = 180;
+  else{
+    if(a1 + trim1 > 180){
+      a1 = 180;
+    }
   }
-  if(a3 > 180){
-    a3 = 180;
+
+  if(trim2 < 0){
+    if (a2 < fabs(trim2)){
+      a2 = 0;
+    }
+    else{
+      a2 = a2 + trim2;
+    }      
   }
-  if(a4 > 180){
-    a4 = 180;
+  else{
+    if(a2 + trim2 > 180){
+      a2 = 180;
+    }
   }
-  if(a1 < 0) {
-    a1 = 0;
+
+  if(trim3 < 0){
+    if (a3 < fabs(trim3)){
+      a3 = 0;
+    }
+    else{
+      a3 = a3 + trim3;
+    }      
   }
-  if(a2 < 0){
-    a2 = 0;
+  else{
+    if(a3 + trim3 > 180){
+      a3 = 180;
+    }
   }
-  if (a3 < 0){
-    a3 = 0;
+
+  if(trim4 < 0){
+    if (a4 < fabs(trim4)){
+      a4 = 0;
+    }
+    else{
+      a4 = a4 + trim4;
+    }      
   }
-  if (a4 < 0){
-    a4 = 0;
+  else{
+    if(a4 + trim4 > 180){
+      a4 = 180;
+    }
   }
+
 
   unsigned char packet[5] = {'S', a1, a2, a3, a4};
 
@@ -441,22 +470,9 @@ int Controller::voltage(float* volts){
   
 int Controller::close(void){
   
-  unsigned char packet[5] = {'D', 0, 0, 'F', 'F'};
+  drive(0, 0, 'F', 'F');
 
-  serialPort.m_write(packet, 5);
-  while(serialPort.peek() <1);
-  serialPort.m_read(&status, 1);
-
-  packet[0] = 'S';
-  packet[1] = 90;
-  packet[2] = 90;
-  packet[3] = 90;
-  packet[4] = 90;
-
-  serialPort.m_write(packet, 5);
-  while(serialPort.peek() < 1);
-  serialPort.m_read(&status, 1);
-
+  steer(90, 90, 90, 90);
 
   retractCamera();
 

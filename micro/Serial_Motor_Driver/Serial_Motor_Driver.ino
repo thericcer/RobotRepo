@@ -150,9 +150,10 @@ void loop(){
     
   }
   
-  if(digitalRead(20) != 1){
+  /*NEED TO CHANGE VALUES TO CORRECT VOLTAGE!
+  if(analogRead(0) < 1 || analogRead(1) < 1){
     state = ERROR;
-  }
+    }*/
 
   //Normal packet received state
   if (state == NORMAL){
@@ -253,7 +254,6 @@ void loop(){
 	pinMode(22, INPUT);    
 	SensorArray[2] = (pulseIn(22, HIGH, 10000));
 	break;
-        
 	
       case 3:
 	pinMode(23, OUTPUT);
@@ -266,6 +266,27 @@ void loop(){
 	SensorArray[3] = (pulseIn(23, HIGH, 10000));
 	break;
         
+      case 4:
+	pinMode(24, OUTPUT);
+	digitalWrite(24, LOW);
+	delayMicroseconds(2);
+	digitalWrite(24, HIGH);
+	delayMicroseconds(5);
+	digitalWrite(24, LOW);
+	pinMode(24, INPUT);    
+	SensorArray[2] = (pulseIn(24, HIGH, 10000));
+	break;
+
+      case 5:
+	pinMode(25, OUTPUT);
+	digitalWrite(25, LOW);
+	delayMicroseconds(2);
+	digitalWrite(25, HIGH);
+	delayMicroseconds(5);
+	digitalWrite(25, LOW);
+	pinMode(25, INPUT);    
+	SensorArray[2] = (pulseIn(25, HIGH, 10000));
+	break;
       }
       
       Serial.write(SensorArray[inPacket[1]] & 0xFF);
