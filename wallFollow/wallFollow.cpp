@@ -17,6 +17,7 @@ void killed(int sig){
   controller.drive(0, 0, 'F', 'F');
   controller.steer(90, 90, 90, 90);
   printf("Robot should be stopped and facing forward\n");
+  controller.close();
   exit(1);
 }
 
@@ -68,8 +69,8 @@ void getSquare(void){
     
 
     if(angle > 0.05){
-      controller.steer(45,135, 45, 135);
-      controller.drive(150, 150, 'F', 'R');
+      controller.steer(135,45, 45, 135);
+      controller.drive(150, 150, 'R', 'F');
       while(angle > 0.05){
 	controller.getSensor(2, &sensors[2]);
 	controller.getSensor(3, &sensors[3]);
@@ -81,8 +82,8 @@ void getSquare(void){
     }
 
     if(angle < -0.05){
-      controller.steer(45, 135, 45, 135);
-      controller.drive(150, 150, 'R', 'F');
+      controller.steer(135, 45, 45, 135);
+      controller.drive(150, 150, 'F', 'R');
       while(angle < -0.05){
 	controller.getSensor(2, &sensors[2]);
 	controller.getSensor(3, &sensors[3]);
