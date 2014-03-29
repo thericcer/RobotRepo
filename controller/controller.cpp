@@ -2,7 +2,7 @@
 #include <iostream>
 #include <stdio.h>
 
-Controller::Controller(std::string file):trim1(0),trim2(0),trim3(0),trim4(0), boomLower(77), boomLowerHome(77), boomUpper(70), boomUpperHome(70), hookHome(170){
+Controller::Controller(std::string file):connected(0), trim1(0),trim2(0),trim3(0),trim4(0), boomLower(77), boomLowerHome(77), boomUpper(70), boomUpperHome(70), hookHome(170){
   serialPort.open_port(file);
 
   sleep(2);

@@ -9,7 +9,9 @@
 class Controller{
 
 private:
+
   Serial serialPort; // serial class object
+  char connected;
   char status; //Current status byte
 
   //Trim values for each of the steering motors
