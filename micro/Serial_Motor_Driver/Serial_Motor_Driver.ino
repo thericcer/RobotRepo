@@ -50,8 +50,8 @@ unsigned char inPacket[5];
 unsigned char StatusByte = 0;
 unsigned char LoopCount = 0;
 
-int SensorArray[4] = {0};
-int SensorCal[4] = {0};
+unsigned short SensorArray[6] = {0};
+unsigned short SensorCal[6] = {0};
 
 unsigned char SteerArray[4] = {0};
 unsigned char MotorArray[4] = {0};
@@ -281,7 +281,7 @@ void loop(){
 	delayMicroseconds(5);
 	digitalWrite(24, LOW);
 	pinMode(24, INPUT);    
-	SensorArray[2] = (pulseIn(24, HIGH, 10000));
+	SensorArray[4] = (pulseIn(24, HIGH, 10000));
 	break;
 
       case 5:
@@ -292,7 +292,7 @@ void loop(){
 	delayMicroseconds(5);
 	digitalWrite(25, LOW);
 	pinMode(25, INPUT);    
-	SensorArray[2] = (pulseIn(25, HIGH, 10000));
+	SensorArray[5] = (pulseIn(25, HIGH, 10000));
 	break;
       }
       
