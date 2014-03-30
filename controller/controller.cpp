@@ -525,8 +525,6 @@ int Controller::pusher(char direction){
       serialPort.m_read(&status,1);
       
       //Wait until it's done
-      while(serialPort.peek()<1);
-      serialPort.m_read(&done, 1);
     }
     if (direction=='S'){
       
@@ -534,6 +532,7 @@ int Controller::pusher(char direction){
       serialPort.m_write(packet,5);
       while(serialPort.peek()<1);
       serialPort.m_read(&status,1);
+
     }
     if (direction=='R'){
       
@@ -541,6 +540,7 @@ int Controller::pusher(char direction){
       serialPort.m_write(packet,5);
       while(serialPort.peek()<1);
       serialPort.m_read(&status,1);
+
     }
     
     //Wait until it's done

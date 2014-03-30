@@ -10,7 +10,7 @@ int main(void){
 
   printf("Deploying Robot things!\n");
 
-/*  controller.steer(105, 105, 105, 105);
+  controller.steer(105, 105, 105, 105);
   sleep(1);
   controller.steer(90, 90, 90, 90);
   sleep(1);
@@ -19,7 +19,7 @@ int main(void){
   controller.drive(255, 255, 'R', 'R');
   usleep(500000);
   controller.drive(0, 0, 'F', 'F');
-*/
+
   sleep(1);
   printf("Hook\n");
   controller.deployHook(90);
@@ -28,10 +28,6 @@ int main(void){
   controller.deployCamera(3, 15);
   sleep(1);
   printf("Pusher R\n");
-  controller.pusher('R');
-  sleep(15);
-  printf("Pusher S\n");
-  controller.pusher('S');
   controller.pusher('R');
   printf("Pusher S\n");
   controller.pusher('S');
