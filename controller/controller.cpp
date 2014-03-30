@@ -146,9 +146,11 @@ int Controller::getSensor(unsigned char sensor, unsigned short* sensorValue){
     //Wait for two more bytes and throw those into the sensorValue short.
     while(serialPort.peek() < 2);
     serialPort.m_read(inputBuffer, 2);
-    
+
     //Combine valued into short
-    *sensorValue = (inputBuffer[1] << 8) + inputBuffer[0];
+    *sensorValue = (inputBuffer[0]&0xFF | inputBuffer[1]<<8);
+    //    printf("LOW: %X\t HIGH: %X\tOUTPUT: %X\n", (inputBuffer[0]), inputBuffer[1], *sensorValue);
+    
   }
   
   mtx.unlock();

@@ -260,6 +260,9 @@ void loop(){
 	digitalWrite(22, LOW);
 	pinMode(22, INPUT);    
 	SensorArray[2] = (pulseIn(22, HIGH, 10000));
+	if(SensorArray[2] > 11000){
+	  SensorArray[2] = 0;
+	}
 	break;
 	
       case 3:
@@ -271,6 +274,9 @@ void loop(){
 	digitalWrite(23, LOW);
 	pinMode(23, INPUT);    
 	SensorArray[3] = (pulseIn(23, HIGH, 10000));
+	if(SensorArray[3] > 11000){
+	  SensorArray[3] = 0;
+	}
 	break;
         
       case 4:
@@ -296,8 +302,8 @@ void loop(){
 	break;
       }
       
-      Serial.write(SensorArray[inPacket[1]] & 0xFF);
-      Serial.write((SensorArray[inPacket[1]] >> 8) & 0xFF);
+      Serial.write((unsigned char)SensorArray[inPacket[1]] & 0xFF);
+      Serial.write((unsigned char)(SensorArray[inPacket[1]] >> 8) & 0xFF);
       break;
       
     case STATUS:
