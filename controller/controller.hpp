@@ -12,7 +12,7 @@ private:
 
   Serial serialPort; // serial class object
   char connected;
-  char status; //Current status byte
+  unsigned  char status; //Current status byte
 
   //Trim values for each of the steering motors
   char trim1;
@@ -100,7 +100,7 @@ public:
     char SteeringArray = a1, a2, a3, a4
     unsigned short LoopTime in ms
   */
-  int getStatus(char* statusArray);
+  int getStatus(unsigned char* statusArray);
 
 
   /*Calling this function will populate the passed in float with the current battery voltage*/

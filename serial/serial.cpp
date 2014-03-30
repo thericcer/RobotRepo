@@ -66,7 +66,7 @@ int Serial::m_write(unsigned char* _char, int _length) {
   return write(fd, _char, _length);
 }
 
-int Serial::m_read(char* o_string, int bytes)
+int Serial::m_read(unsigned char* o_string, int bytes)
 {
   int bytes_available;
   ioctl(fd, FIONREAD, &bytes_available);
