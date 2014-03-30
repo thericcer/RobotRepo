@@ -26,10 +26,12 @@ int Controller::drive(unsigned char s1, unsigned char s2, char dir1, char dir2){
 
   while(!mtx.try_lock());
 
-  //Write packet and wait for status byte
-  serialPort.m_write(packet, 5);
-  while(serialPort.peek() < 1);
-  serialPort.m_read(&status, 1);
+  if(connected){
+    //Write packet and wait for status byte
+    serialPort.m_write(packet, 5);
+    while(serialPort.peek() < 1);
+    serialPort.m_read(&status, 1);
+  }
 
   mtx.unlock();
 
@@ -113,12 +115,12 @@ int Controller::steer(unsigned char a1, unsigned char a2, unsigned char a3, unsi
   unsigned char packet[5] = {'S', a1, a2, a3, a4};
 
   while(!mtx.try_lock());
-
-  //Write packet and wait for status byte
-  serialPort.m_write(packet, 5);
-  while(serialPort.peek() < 1);
-  serialPort.m_read(&status, 1);
-
+  if(connected){
+    //Write packet and wait for status byte
+    serialPort.m_write(packet, 5);
+    while(serialPort.peek() < 1);
+    serialPort.m_read(&status, 1);
+  }
   mtx.unlock();
 
   if (status == 0x2){
@@ -135,18 +137,20 @@ int Controller::getSensor(unsigned char sensor, unsigned short* sensorValue){
 
   while(!mtx.try_lock());
 
-  //Write packet and wait for first byte, status byte.
-  serialPort.m_write(packet, 5);
-  while(serialPort.peek() < 1);
-  serialPort.m_read(&status, 1);
-
-  //Wait for two more bytes and throw those into the sensorValue short.
-  while(serialPort.peek() < 2);
-  serialPort.m_read(inputBuffer, 2);
-
-  //Combine valued into short
-  *sensorValue = (inputBuffer[1] << 8) + inputBuffer[0];
-
+  if(connected){
+    //Write packet and wait for first byte, status byte.
+    serialPort.m_write(packet, 5);
+    while(serialPort.peek() < 1);
+    serialPort.m_read(&status, 1);
+    
+    //Wait for two more bytes and throw those into the sensorValue short.
+    while(serialPort.peek() < 2);
+    serialPort.m_read(inputBuffer, 2);
+    
+    //Combine valued into short
+    *sensorValue = (inputBuffer[1] << 8) + inputBuffer[0];
+  }
+  
   mtx.unlock();
 
   //Return based on status byte
@@ -163,11 +167,12 @@ int Controller::movePlatform(char direction){
   
   while(!mtx.try_lock());
 
-  //Write packet and wait for status byte
-  serialPort.m_write(packet, 5);
-  while(serialPort.peek() < 1);
-  serialPort.m_read(&status, 1);
-
+  if(connected){
+    //Write packet and wait for status byte
+    serialPort.m_write(packet, 5);
+    while(serialPort.peek() < 1);
+    serialPort.m_read(&status, 1);
+  }
   mtx.unlock();
 
   if (status == 0x2){
@@ -183,13 +188,15 @@ int Controller::deployHook(unsigned char position){
   int i;
   while(!mtx.try_lock());
 
-  //write packet on serial port
-  serialPort.m_write(packet, 5);
-  while(serialPort.peek()<1);
-  serialPort.m_read(&status, 1);    
+  if(connected){
+    //write packet on serial port
+    serialPort.m_write(packet, 5);
+    while(serialPort.peek()<1);
+    serialPort.m_read(&status, 1);    
+  }
 
   mtx.unlock();
-
+  
   if (status == 0x2){
     return 1;
   }
@@ -204,9 +211,11 @@ int Controller::retractHook(void){
 
   while(mtx.try_lock());
 
-  serialPort.m_write(packet, 5);
-  while(serialPort.peek()<1);
-  serialPort.m_read(&status, 1);
+  if(connected){
+    serialPort.m_write(packet, 5);
+    while(serialPort.peek()<1);
+    serialPort.m_read(&status, 1);
+  }
 
   mtx.unlock();
 
@@ -224,82 +233,84 @@ int Controller::deployCamera(unsigned char lower, unsigned char upper){
 
   while(!mtx.try_lock()); 
 
-  if(boomLowerHome < 180 && boomUpperHome < 180){
-    serialPort.m_write(packet, 5);
-    while(serialPort.peek() < 1);
+  if(connected){
+
+    if(boomLowerHome < 180 && boomUpperHome < 180){
+      serialPort.m_write(packet, 5);
+      while(serialPort.peek() < 1);
+      serialPort.m_read(&status, 1);
+    }
+    else{
+      packet[0] = 'B';
+      packet[1] = 180;
+      packet[2] = 180;
+      packet[3] = 0;
+      packet[4] = 0;
+      serialPort.m_write(packet, 5);
+      while(serialPort.peek() < 1);
     serialPort.m_read(&status, 1);
   }
-  else{
-    packet[0] = 'B';
-    packet[1] = 180;
-    packet[2] = 180;
-    packet[3] = 0;
-    packet[4] = 0;
-    serialPort.m_write(packet, 5);
-    while(serialPort.peek() < 1);
-    serialPort.m_read(&status, 1);
-  }
-  if(boomLowerHome < lower && boomUpperHome < upper){
-    for(i=boomLowerHome; i < lower; i+=1){
-          packet[0] = 'C';
-	  packet[1] = i;
-	  packet[2] = boomUpperHome;
-	  packet[3] = 0;
-	  packet[4] = 0;
-	  serialPort.m_write(packet, 5);
-	  while(serialPort.peek() < 1);
-	  serialPort.m_read(&status, 1);
-	  usleep(10000);
-	  boomLower = i;
-	  boomUpper = boomUpperHome;
-
+    if(boomLowerHome < lower && boomUpperHome < upper){
+      for(i=boomLowerHome; i < lower; i+=1){
+	packet[0] = 'C';
+	packet[1] = i;
+	packet[2] = boomUpperHome;
+	packet[3] = 0;
+	packet[4] = 0;
+	serialPort.m_write(packet, 5);
+	while(serialPort.peek() < 1);
+	serialPort.m_read(&status, 1);
+	usleep(10000);
+	boomLower = i;
+	boomUpper = boomUpperHome;
+	
+      }
+      
+      for(i=boomUpperHome; i < upper; i+=1){
+	packet[0] = 'C';
+	packet[1] = lower;
+	packet[2] = i;
+	packet[3] = 0;
+	packet[4] = 0;
+	
+	serialPort.m_write(packet, 5);
+	while(serialPort.peek() < 1);
+	serialPort.m_read(&status, 1);
+	usleep(10000);
+	boomUpper = i;
+      }
     }
     
-    for(i=boomUpperHome; i < upper; i+=1){
-          packet[0] = 'C';
-	  packet[1] = lower;
-	  packet[2] = i;
-	  packet[3] = 0;
-	  packet[4] = 0;
-     
-	  serialPort.m_write(packet, 5);
-	  while(serialPort.peek() < 1);
-	  serialPort.m_read(&status, 1);
-	  usleep(10000);
-	  boomUpper = i;
-    }
+    else{
+      for(i=boomLowerHome; i > lower; i-=1){
+	packet[0] = 'C';
+	packet[1] = i;
+	packet[2] = boomUpperHome;
+	packet[3] = 0;
+	packet[4] = 0;
+	serialPort.m_write(packet, 5);
+	while(serialPort.peek() < 1);
+	serialPort.m_read(&status, 1);
+	usleep(10000);
+	boomLower = i;
+	boomUpper = boomUpperHome;
+      }
+      
+      for(i=boomUpperHome; i > upper; i-=1){
+	packet[0] = 'C';
+	packet[1] = lower;
+	packet[2] = i;
+	packet[3] = 0;
+	packet[4] = 0;
+	
+	serialPort.m_write(packet, 5);
+	while(serialPort.peek() < 1);
+	serialPort.m_read(&status, 1);
+	usleep(10000);
+	boomUpper = i;
+      }
+    }  
   }
-
-  else{
-    for(i=boomLowerHome; i > lower; i-=1){
-          packet[0] = 'C';
-	  packet[1] = i;
-	  packet[2] = boomUpperHome;
-	  packet[3] = 0;
-	  packet[4] = 0;
-	  serialPort.m_write(packet, 5);
-	  while(serialPort.peek() < 1);
-	  serialPort.m_read(&status, 1);
-	  usleep(10000);
-	  boomLower = i;
-	  boomUpper = boomUpperHome;
-    }
-    
-    for(i=boomUpperHome; i > upper; i-=1){
-          packet[0] = 'C';
-	  packet[1] = lower;
-	  packet[2] = i;
-	  packet[3] = 0;
-	  packet[4] = 0;
-     
-	  serialPort.m_write(packet, 5);
-	  while(serialPort.peek() < 1);
-	  serialPort.m_read(&status, 1);
-	  usleep(10000);
-	  boomUpper = i;
-    }
-  }
-    
   mtx.unlock();
   
   if(status == 0x2){
@@ -316,63 +327,64 @@ int Controller::retractCamera(void){
 
   while(!mtx.try_lock());
 
-  if(boomLower < boomLowerHome && boomUpper < boomUpperHome){
-    for(i=boomLower; i < boomLowerHome; i+=1){
-          packet[0] = 'C';
-	  packet[1] = i;
-	  packet[2] = boomUpper;
-	  packet[3] = 0;
-	  packet[4] = 0;
-	  serialPort.m_write(packet, 5);
-	  while(serialPort.peek() < 1);
-	  serialPort.m_read(&status, 1);
-	  usleep(10000);
-    }
-    
-    for(i=boomUpper; i < boomUpperHome; i+=1){
-          packet[0] = 'C';
-	  packet[1] = boomLowerHome;
-	  packet[2] = i;
-	  packet[3] = 0;
-	  packet[4] = 0;
-     
-	  serialPort.m_write(packet, 5);
-	  while(serialPort.peek() < 1);
-	  serialPort.m_read(&status, 1);
-	  usleep(10000);
-    }
-  }
+  if(connected){
 
-  else{
-    for(i=boomLower; i > boomLowerHome; i-=1){
-          packet[0] = 'C';
-	  packet[1] = i;
-	  packet[2] = boomUpper;
-	  packet[3] = 0;
-	  packet[4] = 0;
-	  serialPort.m_write(packet, 5);
-	  while(serialPort.peek() < 1);
-	  serialPort.m_read(&status, 1);
-	  usleep(10000);
+    if(boomLower < boomLowerHome && boomUpper < boomUpperHome){
+      for(i=boomLower; i < boomLowerHome; i+=1){
+	packet[0] = 'C';
+	packet[1] = i;
+	packet[2] = boomUpper;
+	packet[3] = 0;
+	packet[4] = 0;
+	serialPort.m_write(packet, 5);
+	while(serialPort.peek() < 1);
+	serialPort.m_read(&status, 1);
+	usleep(10000);
+      }
+      
+      for(i=boomUpper; i < boomUpperHome; i+=1){
+	packet[0] = 'C';
+	packet[1] = boomLowerHome;
+	packet[2] = i;
+	packet[3] = 0;
+	packet[4] = 0;
+	
+	serialPort.m_write(packet, 5);
+	while(serialPort.peek() < 1);
+	serialPort.m_read(&status, 1);
+	usleep(10000);
+      }
     }
     
-    for(i=boomUpper; i > boomUpperHome; i-=1){
-          packet[0] = 'C';
-	  packet[1] = boomLowerHome;
-	  packet[2] = i;
-	  packet[3] = 0;
-	  packet[4] = 0;
-     
-	  serialPort.m_write(packet, 5);
-	  while(serialPort.peek() < 1);
-	  serialPort.m_read(&status, 1);
-	  usleep(10000);
-    }
+    else{
+      for(i=boomLower; i > boomLowerHome; i-=1){
+	packet[0] = 'C';
+	packet[1] = i;
+	packet[2] = boomUpper;
+	packet[3] = 0;
+	packet[4] = 0;
+	serialPort.m_write(packet, 5);
+	while(serialPort.peek() < 1);
+	serialPort.m_read(&status, 1);
+	usleep(10000);
+      }
+      
+      for(i=boomUpper; i > boomUpperHome; i-=1){
+	packet[0] = 'C';
+	packet[1] = boomLowerHome;
+	packet[2] = i;
+	packet[3] = 0;
+	packet[4] = 0;
+	
+	serialPort.m_write(packet, 5);
+	while(serialPort.peek() < 1);
+	serialPort.m_read(&status, 1);
+	usleep(10000);
+      }
+    }  
   }
-    
-  
   mtx.unlock();
-
+  
   if(status == 0x2){
     return 1;
   }
@@ -387,38 +399,38 @@ int Controller::pusher(char direction){
 
   while(!mtx.try_lock());
 
-  //  printf("Controller::pusher\n");
- 
- if (direction=='F'){
-   //   printf("Controller::pusher F\n");
-   packet[1]='F';
-   serialPort.m_write(packet,5);
-   while(serialPort.peek()<1);
-   serialPort.m_read(&status,1);
-
-   //Wait until it's done
-   while(serialPort.peek()<1);
-   serialPort.m_read(&done, 1);
- }
- if (direction=='S'){
-   //   printf("Controller::pusher S\n");
-   packet[1]='S';
-   serialPort.m_write(packet,5);
-   while(serialPort.peek()<1);
-   serialPort.m_read(&status,1);
- }
- if (direction=='R'){
-   //   printf("Controller::pusher R\n");
-   packet[1]='R';
-   serialPort.m_write(packet,5);
-   while(serialPort.peek()<1);
-   serialPort.m_read(&status,1);
-
-   //Wait until it's done
-   while(serialPort.peek()<1);
-   serialPort.m_read(&done, 1);
- }
-
+  if(connected){
+    
+    if (direction=='F'){
+      
+      packet[1]='F';
+      serialPort.m_write(packet,5);
+      while(serialPort.peek()<1);
+      serialPort.m_read(&status,1);
+      
+      //Wait until it's done
+      while(serialPort.peek()<1);
+      serialPort.m_read(&done, 1);
+    }
+    if (direction=='S'){
+      
+      packet[1]='S';
+      serialPort.m_write(packet,5);
+      while(serialPort.peek()<1);
+      serialPort.m_read(&status,1);
+    }
+    if (direction=='R'){
+      
+      packet[1]='R';
+      serialPort.m_write(packet,5);
+      while(serialPort.peek()<1);
+      serialPort.m_read(&status,1);
+      
+      //Wait until it's done
+      while(serialPort.peek()<1);
+      serialPort.m_read(&done, 1);
+    }
+  }
  mtx.unlock(); 
 }
 
@@ -428,14 +440,16 @@ int Controller::getStatus(char* statusArray){
 
   while(!mtx.try_lock());
 
-  //Write Packet and wait for status
-  serialPort.m_write(packet, 5);
-  while(serialPort.peek() < 1);
-  serialPort.m_read(&status, 1);
-
-  //Wait until there are 10 bytes in the input buffer, then read them all in
-  while(serialPort.peek() < 10);
-  serialPort.m_read(statusArray, 10);
+  if(connected){
+    //Write Packet and wait for status
+    serialPort.m_write(packet, 5);
+    while(serialPort.peek() < 1);
+    serialPort.m_read(&status, 1);
+    
+    //Wait until there are 10 bytes in the input buffer, then read them all in
+    while(serialPort.peek() < 10);
+    serialPort.m_read(statusArray, 10);
+  }
 
   mtx.unlock();
 
@@ -456,20 +470,22 @@ int Controller::voltage(float* volts){
 
   while(mtx.try_lock());
   
+  if(connected){
 
-  serialPort.m_write(packet, 5);
-  while(serialPort.peek()<1);
-  serialPort.m_read(&status, 1);
-
-
-  //We must read the 2 returned bytes.
-  while(serialPort.peek()<2);
-  serialPort.m_read(data, 2);
-
-  temp = data[0] | data[1]<<8;
-
-
-  *volts = (5.0/1024) * temp * 3;
+    serialPort.m_write(packet, 5);
+    while(serialPort.peek()<1);
+    serialPort.m_read(&status, 1);
+    
+    
+    //We must read the 2 returned bytes.
+    while(serialPort.peek()<2);
+    serialPort.m_read(data, 2);
+    
+    temp = data[0] | data[1]<<8;
+    
+    
+    *volts = (5.0/1024) * temp * 3;
+  }
 
   mtx.unlock();
 
@@ -483,17 +499,20 @@ int Controller::voltage(float* volts){
   
 int Controller::close(void){
   
-  drive(0, 0, 'F', 'F');
 
-  steer(90, 90, 90, 90);
-
-  retractCamera();
-
-  retractHook();
-
-
-  pusher('R');
-  pusher('F');
-  pusher('S');
-  serialPort.close_port();
+  if(connected){
+    drive(0, 0, 'F', 'F');
+    
+    steer(90, 90, 90, 90);
+    
+    retractCamera();
+    
+    retractHook();
+    
+    
+    pusher('R');
+    pusher('F');
+    pusher('S');
+    serialPort.close_port();
+  }
 }
