@@ -692,9 +692,7 @@ int Controller::close(void){
   syslog(LOG_MAKEPRI(LOG_LOCAL0, LOG_INFO), "Positioning Pusher");
 #endif
     
-    pusher('R');
     pusher('F');
-    pusher('S');
 
 #ifdef DEBUG
   syslog(LOG_MAKEPRI(LOG_LOCAL0, LOG_INFO), "Closing Serial Port");
