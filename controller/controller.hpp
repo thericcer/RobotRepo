@@ -12,7 +12,7 @@ private:
 
   Serial serialPort; // serial class object
   char connected;
-  char status; //Current status byte
+  unsigned  char status; //Current status byte
 
   //Trim values for each of the steering motors
   char trim1;
@@ -67,6 +67,11 @@ public:
   */
   int movePlatform(char direction);
 
+  /*This function takes in a pointer to an unsigned short and populates it with the
+    position of the platform
+  */
+  int platformPosition(unsigned short* position);
+
   /*Takes an angle between 0 and 180 and it moves the position of the hook to that angle*/
   int deployHook(unsigned char angle);
 
@@ -100,7 +105,7 @@ public:
     char SteeringArray = a1, a2, a3, a4
     unsigned short LoopTime in ms
   */
-  int getStatus(char* statusArray);
+  int getStatus(unsigned char* statusArray);
 
 
   /*Calling this function will populate the passed in float with the current battery voltage*/

@@ -21,7 +21,7 @@ private:
 public:
   int open_port(std::string n_string);
   int m_write(unsigned char* _char, int _length);
-  int m_read(char* r_string, int bytes);
+  int m_read(unsigned char* r_string, int bytes);
   int peek();
   void clear();
   int close_port();
