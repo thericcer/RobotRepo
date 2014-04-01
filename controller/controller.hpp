@@ -67,6 +67,11 @@ public:
   */
   int movePlatform(char direction);
 
+  /*This function takes in a pointer to an unsigned short and populates it with the
+    position of the platform
+  */
+  int platformPosition(unsigned short* position);
+
   /*Takes an angle between 0 and 180 and it moves the position of the hook to that angle*/
   int deployHook(unsigned char angle);
 

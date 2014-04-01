@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <syslog.h>
 
-#define DEBUG
+//#define DEBUG
 
 
 Controller::Controller(std::string file):connected(-1), trim1(0),trim2(0),trim3(0),trim4(0), boomLower(77), boomLowerHome(77), boomUpper(70), boomUpperHome(70), hookHome(170){
@@ -247,6 +247,47 @@ int Controller::movePlatform(char direction){
   closelog();
 #endif
 }
+
+int Controller::platformPosition(unsigned short* position){
+  unsigned char packet[5] = {'Y', 0, 0, 0, 0};
+  unsigned char tempPosition[2] = {0};
+
+  while(!mtx.try_lock());
+
+#ifdef DEBUG
+  openlog("Robot", LOG_PERROR | LOG_CONS | LOG_NDELAY, LOG_LOCAL0);
+  syslog(LOG_MAKEPRI(LOG_LOCAL0, LOG_INFO), "Getting Platform Position");
+#endif
+
+  serialPort.m_write(packet, 5);
+  while(serialPort.peek() < 1);
+  serialPort.m_read(&status, 1);
+
+#ifdef DEBUG
+  syslog(LOG_MAKEPRI(LOG_LOCAL0, LOG_INFO), "Waiting for position");
+#endif
+
+  while(serialPort.peek() < 2);
+  serialPort.m_read(tempPosition, 2);
+
+  *position = (tempPosition[0] & 0xFF) | (tempPosition[1]<<8);
+
+  mtx.unlock();
+
+  if (status == 0x2){
+    return 1;
+  }
+  else{
+#ifdef DEBUG
+    syslog(LOG_MAKEPRI(LOG_LOCAL0, LOG_WARNING), "Got bad status %X", status);
+#endif
+    return -1;
+  }
+#ifdef DEBUG
+  closelog();
+#endif
+}
+
 
 int Controller::deployHook(unsigned char position){
   unsigned char packet[5] = {'H', position, 'x', 'x', 'x'};

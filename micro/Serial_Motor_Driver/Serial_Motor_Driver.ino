@@ -31,7 +31,7 @@
 #define HOOK 'H'
 #define VOLTAGE 'V'
 #define JAW 'J'
-
+#define PLATFORM_POSITION 'Y'
 
 enum {ERROR, NORMAL, SLEEP};
 char errorFlag = 0;
@@ -59,7 +59,9 @@ unsigned char MotorArray[4] = {0};
 int loopTime = 0;
 int oldLoopTime = 0;
 
-short voltage = 0;
+unsigned short voltage = 0;
+unsigned short platformPosition = 0;
+
 
 Servo leftFront;
 Servo leftRear;
@@ -329,6 +331,12 @@ void loop(){
       }
       break;
       
+    case PLATFORM_POSITION:
+      platformPosition = analogRead(2);
+      Serial.write(platformPosition & 0xFF);
+      Serial.write((platformPosition>>8) & 0xFF);
+      break;
+
     case CAMERA:
       cameraBoomLower.write(inPacket[1]);
       cameraBoomUpper.write(inPacket[2]);
@@ -361,7 +369,7 @@ void loop(){
       break;
 
     case VOLTAGE:
-      voltage = analogRead(2);
+      voltage = analogRead(3);
       Serial.write(voltage & 0xFF);
       Serial.write((voltage>>8) & 0xFF);
       break;
