@@ -18,9 +18,7 @@ Controller::Controller(std::string file):connected(-1), trim1(0),trim2(0),trim3(
     #endif
   }
   else{
-    #ifdef DEBUG
     syslog(LOG_MAKEPRI(LOG_LOCAL0, LOG_ERR), "Could Not Open Port!");
-    #endif
   }
 
   closelog();
@@ -357,8 +355,8 @@ int Controller::retractHook(void){
 #endif
 }
 
-int Controller::deployCamera(unsigned char lower, unsigned char upper){
-  unsigned char packet[5] = {'B', boomLowerHome, boomUpperHome, 0, 0};
+int Controller::deployCamera(unsigned char lower, unsigned char upper, bool onOff){
+  unsigned char packet[5] = {'B', boomLowerHome, boomUpperHome, onOff, 0};
   int i;
 
   while(!mtx.try_lock()); 
@@ -379,7 +377,7 @@ int Controller::deployCamera(unsigned char lower, unsigned char upper){
       packet[0] = 'B';
       packet[1] = 180;
       packet[2] = 180;
-      packet[3] = 0;
+      packet[3] = onOff;
       packet[4] = 0;
       serialPort.m_write(packet, 5);
       while(serialPort.peek() < 1);
@@ -390,7 +388,7 @@ int Controller::deployCamera(unsigned char lower, unsigned char upper){
 	packet[0] = 'C';
 	packet[1] = i;
 	packet[2] = boomUpperHome;
-	packet[3] = 0;
+	packet[3] = onOff;
 	packet[4] = 0;
 	serialPort.m_write(packet, 5);
 	while(serialPort.peek() < 1);
@@ -405,7 +403,7 @@ int Controller::deployCamera(unsigned char lower, unsigned char upper){
 	packet[0] = 'C';
 	packet[1] = lower;
 	packet[2] = i;
-	packet[3] = 0;
+	packet[3] = onOff;
 	packet[4] = 0;
 	
 	serialPort.m_write(packet, 5);
@@ -421,7 +419,7 @@ int Controller::deployCamera(unsigned char lower, unsigned char upper){
 	packet[0] = 'C';
 	packet[1] = i;
 	packet[2] = boomUpperHome;
-	packet[3] = 0;
+	packet[3] = onOff;
 	packet[4] = 0;
 	serialPort.m_write(packet, 5);
 	while(serialPort.peek() < 1);
@@ -435,7 +433,7 @@ int Controller::deployCamera(unsigned char lower, unsigned char upper){
 	packet[0] = 'C';
 	packet[1] = lower;
 	packet[2] = i;
-	packet[3] = 0;
+	packet[3] = onOff;
 	packet[4] = 0;
 	
 	serialPort.m_write(packet, 5);
@@ -480,7 +478,7 @@ int Controller::retractCamera(void){
 	packet[0] = 'C';
 	packet[1] = i;
 	packet[2] = boomUpper;
-	packet[3] = 0;
+	packet[3] = 1;
 	packet[4] = 0;
 	serialPort.m_write(packet, 5);
 	while(serialPort.peek() < 1);
@@ -492,7 +490,7 @@ int Controller::retractCamera(void){
 	packet[0] = 'C';
 	packet[1] = boomLowerHome;
 	packet[2] = i;
-	packet[3] = 0;
+	packet[3] = 1;
 	packet[4] = 0;
 	
 	serialPort.m_write(packet, 5);
@@ -507,7 +505,7 @@ int Controller::retractCamera(void){
 	packet[0] = 'C';
 	packet[1] = i;
 	packet[2] = boomUpper;
-	packet[3] = 0;
+	packet[3] = 1;
 	packet[4] = 0;
 	serialPort.m_write(packet, 5);
 	while(serialPort.peek() < 1);
@@ -519,7 +517,7 @@ int Controller::retractCamera(void){
 	packet[0] = 'C';
 	packet[1] = boomLowerHome;
 	packet[2] = i;
-	packet[3] = 0;
+	packet[3] = 1;
 	packet[4] = 0;
 	
 	serialPort.m_write(packet, 5);
@@ -527,7 +525,11 @@ int Controller::retractCamera(void){
 	serialPort.m_read(&status, 1);
 	usleep(10000);
       }
-    }  
+    }
+    packet[3] = 0;
+    serialPort.m_write(packet, 5);
+    while(serialPort.peek() < 1);
+    serialPort.m_read(&status, 1);
   }
   mtx.unlock();
   

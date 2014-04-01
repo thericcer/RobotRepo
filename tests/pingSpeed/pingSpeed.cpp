@@ -24,7 +24,7 @@ int main(void){
 
   unsigned short sensors[6] = {0};
 
-    controller.deployCamera(5, 15);
+  controller.deployCamera(5, 15, true);
   while(1){
 
     //    controller.getSensor(0, &sensors[0]);
