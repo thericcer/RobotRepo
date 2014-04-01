@@ -25,7 +25,7 @@ int main(void){
   controller.deployHook(90);
   sleep(1);
   printf("Camera Boom\n");
-  controller.deployCamera(3, 15);
+  controller.deployCamera(3, 15, true);
   sleep(1);
   printf("Pusher R\n");
   controller.pusher('R');

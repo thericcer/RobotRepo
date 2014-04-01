@@ -82,7 +82,7 @@ public:
     The function will hang until the camera servos are in position. The two arguments
     are the positions of each servo.
   */
-  int deployCamera(unsigned char lower, unsigned char upper);
+  int deployCamera(unsigned char lower, unsigned char upper, bool onOff);
 
   /*This function returns the camera boom to it's packed state. The two arguments
     are the upper and lower servos' retracted posistions.

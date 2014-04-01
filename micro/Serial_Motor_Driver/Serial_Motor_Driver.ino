@@ -121,9 +121,9 @@ void setup(){
   leftRear.attach(8);
   rightFront.attach(9);
   rightRear.attach(10);
-  platform.attach(27);
-  cameraBoomLower.attach(28);
-  cameraBoomUpper.attach(29);
+  //  platform.attach(27);
+  //  cameraBoomLower.attach(28);
+  //  cameraBoomUpper.attach(29);
   pusher.attach(30);
   hook.attach(31);
   jawRight.attach(32);
@@ -320,13 +320,16 @@ void loop(){
     case PLATFORM:
       if(inPacket[1] == 'U'){
 	//Move Platform Up
+	platform.attach(27);
 	platform.writeMicroseconds(700);
       }
       if(inPacket[1] == 'D'){
 	//Move Platform Down
+	platform.attach(27);
 	platform.writeMicroseconds(2000);
       }
       if(inPacket[1] == 'S'){
+	platform.detach();
 	platform.writeMicroseconds(1215);
       }
       break;
@@ -338,8 +341,16 @@ void loop(){
       break;
 
     case CAMERA:
-      cameraBoomLower.write(inPacket[1]);
-      cameraBoomUpper.write(inPacket[2]);
+      if(inPacket[3] == 1){
+	cameraBoomLower.attach(28);
+	cameraBoomUpper.attach(29);
+	cameraBoomLower.write(inPacket[1]);
+	cameraBoomUpper.write(inPacket[2]);
+      }
+      else if(inPacket[3] == 0){
+	cameraBoomLower.detach();
+	cameraBoomUpper.detach();
+      }
       break;
 
     case PUSHER:
