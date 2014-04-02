@@ -39,6 +39,10 @@ public:
   /*Constructor opens serial port and serial port location "/dev/ttyXX" is passed in*/
   Controller(std::string file);
 
+  /*This function takes no arguments and returns a 1 if the GO switch is activated
+    and a 0 if the GO switch is not activated
+  */
+  int go(void);
 
   /*This function takes four values for trimming the steering servos. */
   void trim(char t1, char t2, char t3, char t4);

@@ -32,6 +32,7 @@
 #define VOLTAGE 'V'
 #define JAW 'J'
 #define PLATFORM_POSITION 'Y'
+#define GO 'G'
 
 enum {ERROR, NORMAL, SLEEP};
 char errorFlag = 0;
@@ -115,6 +116,9 @@ void setup(){
   /*THese pins set up the pusher switches*/
   pinMode(18, INPUT);
   pinMode(19, INPUT);
+
+  //This pin has the GO switch attached. A value of 1 is go, 0 is no
+  pinMode(21, INPUT);
   
   //Attach Servos and set initial angle
   leftFront.attach(7);
@@ -166,9 +170,19 @@ void loop(){
 
   //Normal packet received state
   if (state == NORMAL){
-    //Figure out what motors are called for
+
     switch (inPacket[0]){
       
+    case GO:
+      if(digitalRead(21)){
+	Serial.write(1);
+      }
+      else{
+	Serial.write(0);
+      }
+
+
+      //Figure out what motors are called for      
       //Drive motors called
     case DRIVE: 
       

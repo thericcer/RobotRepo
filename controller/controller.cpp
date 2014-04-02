@@ -24,7 +24,43 @@ Controller::Controller(std::string file):connected(-1), trim1(0),trim2(0),trim3(
   closelog();
   sleep(2);
 }
+
+int Controller::go(void){
+  unsigned char packet[5] = {'G', 0, 0, 0, 0};
+  unsigned char data = 0;
+
+
+  while(!mtx.try_lock());
   
+  if(connected){
+#ifdef DEBUG
+    openlog("Robot", LOG_PERROR | LOG_CONS | LOG_NDELAY, LOG_LOCAL0);
+    syslog(LOG_MAKEPRI(LOG_LOCAL0, LOG_INFO), "Asking for GO status");
+#endif
+
+    //Write packet
+    serialPort.m_write(packet, 5);
+    while(serialPort.peek() < 1);
+    serialPort.m_read(&status, 1);
+  
+    //Read response
+    while(serialPort.peek() < 1);
+    serialPort.m_read(&data, 1);
+
+#ifdef DEBUG
+    syslog(LOG_MAKEPRI(LOG_LOCAL0, LOG_INFO), "Got a %d back", data);
+    closelog();
+#endif
+
+    if(data){
+      return 1;
+    }
+    else{
+      return 0;
+    }
+  }
+}
+
 int Controller::drive(unsigned char s1, unsigned char s2, char dir1, char dir2){
 
 
