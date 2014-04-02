@@ -1,0 +1,39 @@
+Pinout for micro
+
+PIN    |   FUNCTION
+-------------------------------------
+2      |   H-Bridge A IN1
+3      |   H-Bridge A IN2
+4      |   H-Bridge B IN1
+5      |   H-Bridge B IN2
+-------------------------------------
+7      |   Left Front Steering Servo
+8      |   Left Rear Steering Servo
+9      |   Right Front Steering Servo
+10     |   Right Rear Steering Servo
+-------------------------------------
+11     |   H-Bridge EN A
+12     |   H-Bridge EN B
+-------------------------------------
+18     |   Rear Pusher Switch
+19     |   Front Pusher Switch
+-------------------------------------
+20     |   Emergency Interrupt
+-------------------------------------
+21     |   GO Switch
+-------------------------------------
+27     |   Platform Servo
+-------------------------------------
+28     |   Camera Boom Lower Servo
+29     |   Camera Boom Upper Servo
+-------------------------------------
+30     |   Pusher Servo
+-------------------------------------
+31     |   Hook Servo
+-------------------------------------
+32     |   Right Jaw Servo
+33     |   Left Jaw Servo
++++++++++++++++++++++++++++++++++++++
+A0     |   Front Infrared
+A1     |   Rear Infrared
+A2     |   Platform Position Pot

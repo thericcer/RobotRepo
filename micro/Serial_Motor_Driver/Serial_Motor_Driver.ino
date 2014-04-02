@@ -125,7 +125,7 @@ void setup(){
   leftRear.attach(8);
   rightFront.attach(9);
   rightRear.attach(10);
-  //  platform.attach(27);
+  //  OBplatform.attach(27);
   //  cameraBoomLower.attach(28);
   //  cameraBoomUpper.attach(29);
   pusher.attach(30);
